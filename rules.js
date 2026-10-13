@@ -25,7 +25,7 @@ const RULES = {
   //      Ja  → Gatuadress, Postnummer, Ort
   //      Nej → Adressrad 1, Adressrad 2 (valfritt), Postnummer (valfritt), Ort,
   //            Region/delstat/provins (valfritt), Land
-  //  • "Nästa steg" alltid synlig → Utbildning.
+  //  • "Spara och fortsätt" alltid synlig → Utbildning.
 
   // Spår läkare, steg 2 – Utbildning
   //  • Datum för läkarexamen (ÅÅÅÅMMDD, kalenderikonen öppnar datumväljare).
@@ -34,7 +34,7 @@ const RULES = {
   //      Ja  → inget mer
   //      Nej → "Bifoga dokumentation för legitimationsvillkor" (en eller flera PDF, max 4,5 MB totalt)
   //  • Land inom EU/EES → inga följdfrågor.
-  //  • "Nästa steg" → Yrke.
+  //  • "Spara och fortsätt" → Yrke.
 };
 
 /* Länder: [ISO-kod, namn, inom EU/EES] */
@@ -92,21 +92,21 @@ function nextScreen(current, data) {
  * Spår läkare, steg 3 – Yrke
  * ----------------------------------------------------------------
  *  • Saknar svensk legitimation (land utanför EU/EES + "Nej" i steg 2)
- *      → hela steget ersätts av infotexten "Lokal- och yrkesföreningar".
- *  • Län (inget förval). Lokalförening:
- *      – Skåne län      → "I vilken kommun jobbar du?" → lokalförening beror på kommun
- *      – Stockholm, VGR → lokalförening visas + "Välj sektion för din lokalförening"
- *      – Övriga län     → lokalförening visas direkt
- *  • "Är du färdig specialistläkare?" (alltid synlig, inget förval)
+ *      → hela steget ersätts av infotexten "Lokalavdelningar och yrkesföreningar".
+ *  Frågorna visas stegvis (beslut 2026-10-12): först bara länet.
+ *  • Län (inget förval). Lokalavdelning (länets läkarförening):
+ *      – Skåne län      → "I vilken kommun jobbar du?" → lokalavdelning beror på kommun
+ *      – Stockholm, VGR → lokalavdelning visas + "Välj sektion för din lokalavdelning"
+ *      – Övriga län     → lokalavdelning visas direkt
+ *  • "Är du färdig specialistläkare?" visas först när länet (+ ev. kommun/sektion) är besvarat.
  *      Nej → "Din yrkesförening är Sveriges yngre läkares förening SYLF."
- *      Ja  → "Välj yrkesförening" → efter val:
- *            Sjukhusläkarna + (Stockholm / VGR-sektion / Skånekommun)
- *              → "Din lokalavdelning i din yrkesförening är Sjukhusläkarna <ort>."
- *            annars → "Din yrkesförening är <vald förening>."
+ *      Ja  → "Välj yrkesförening" → efter val, i SAMMA blå ruta:
+ *            "Din yrkesförening är <förening>." + ev. "Din lokalavdelning är Sjukhusläkarna <ort>."
+ *            (lokalavdelning bara för Sjukhusläkarna i Stockholm / VGR-sektion / Skånekommun)
  *  • Byte av län nollställer kommun och sektion.
  * ================================================================ */
 
-// EXEMPELDATA – lokalföreningarnas namn ska stämmas av med SLF
+// EXEMPELDATA – lokalavdelningarnas (läkarföreningarnas) namn ska stämmas av med SLF
 const LAN = [
   ['blekinge', 'Blekinge län', 'Blekinge läkarförening'],
   ['dalarna', 'Dalarnas län', 'Dalarnas läkarförening'],
@@ -131,7 +131,7 @@ const LAN = [
   ['ostergotland', 'Östergötlands län', 'Östergötlands läkarförening'],
 ];
 
-// EXEMPELDATA – Skånes kommuner → [lokalförening, Sjukhusläkarnas lokalavdelning]
+// EXEMPELDATA – Skånes kommuner → [lokalavdelning, Sjukhusläkarnas lokalavdelning]
 const SKANE_OMRADEN = {
   mellersta: ['Mellersta Skånes läkarförening', 'Sjukhusläkarna Lund'],
   malmo:     ['Malmö läkarförening', 'Sjukhusläkarna Malmö'],
@@ -193,7 +193,7 @@ function sektionerFor(lan) {
   return lan === 'stockholm' ? SEKTIONER_STOCKHOLM : lan === 'vgr' ? SEKTIONER_VGR : null;
 }
 
-/* Lokalförening utifrån län (+ kommun i Skåne). null = inte avgjord ännu. */
+/* Lokalavdelning (länets läkarförening) utifrån län (+ kommun i Skåne). null = inte avgjord ännu. */
 function lokalforening(data) {
   if (!data.lan) return null;
   if (data.lan === 'skane') {
@@ -223,7 +223,7 @@ function lokalavdelning(data) {
  *  • Dina föreningar (→ Yrke): döljs om användaren saknar svensk legitimation.
  *  • Månadsavgift: saknar svensk leg → reducerad avgift + annan text. (EXEMPELBELOPP)
  *  • Signering: hämtade uppgifter (personnummer) → "Skicka in ansökan" med BankID
- *               + "Jag har inte BankID" (fäll ut → skicka in utan BankID).
+ *               + "Jag har inte BankID" (fäll ut → hänvisning till medlemsservice, ingen knapp – beslut 2026-10-12).
  *               Manuell inmatning → "Skicka in ansökan" utan BankID, ingen "Jag har inte BankID".
  * ================================================================ */
 const AVGIFT = { ordinarie: 332, reducerad: 56 }; // EXEMPELBELOPP från skiss
@@ -253,23 +253,24 @@ function arRedanMedlem(data) {
  *  Steg: Uppgifter → Utbildning → Signera → kvittens / redan medlem
  *  • Uppgifter: som läkarspåret men utan "Bor du i Sverige?" (alltid svensk adress).
  *  • Utbildning: "Välj ditt universitet" (inget förval)
- *      Svenskt lärosäte    → "Din lokalavdelning är SLF student <ort>." + Förväntat examensdatum
+ *      Svenskt lärosäte    → "Din yrkesförening är Sveriges Läkarförbund Student. Din lokalavdelning är SLF Student <ort>." + Förväntat examensdatum
  *      Studerar utomlands  → Universitet (utomlands) + Land
- *                            → när land valts: "SLF student Utland" + Förväntat examensdatum
+ *                            → när land valts: "SLF Student Utland" + Förväntat examensdatum
  *  • Signera: Dina uppgifter, kontaktuppgifter, utbildning (Ändra), föreningar (ingen Ändra),
  *             årsavgift, valfri prenumeration på Läkartidningen, BankID / "Jag har inte BankID".
  * ================================================================ */
 const UTLAND = 'utland';
+const STUDENT_YRKESFORENING = 'Sveriges Läkarförbund Student';
 
 // EXEMPELDATA – lärosäten med läkarprogram → lokalavdelning
 const UNIVERSITET = [
-  ['goteborg', 'Göteborg', 'SLF student Göteborg'],
-  ['ki', 'Karolinska Institutet', 'SLF student Stockholm'],
-  ['linkoping', 'Linköping', 'SLF student Linköping'],
-  ['lund', 'Lund', 'SLF student Lund'],
-  ['umea', 'Umeå', 'SLF student Umeå'],
-  ['uppsala', 'Uppsala', 'SLF student Uppsala'],
-  ['orebro', 'Örebro', 'SLF student Örebro'],
+  ['goteborg', 'Göteborg', 'SLF Student Göteborg'],
+  ['ki', 'Karolinska Institutet', 'SLF Student Stockholm'],
+  ['linkoping', 'Linköping', 'SLF Student Linköping'],
+  ['lund', 'Lund', 'SLF Student Lund'],
+  ['umea', 'Umeå', 'SLF Student Umeå'],
+  ['uppsala', 'Uppsala', 'SLF Student Uppsala'],
+  ['orebro', 'Örebro', 'SLF Student Örebro'],
 ];
 
 const AVGIFT_STUDENT = 349;        // kr per år – från skiss
@@ -277,7 +278,7 @@ const PRIS_LAKARTIDNINGEN = 150;   // kr per år – från skiss
 
 /* Lokalavdelning för student. null = inte avgjord ännu (styr även när examensdatum visas). */
 function studentLokalavdelning(data) {
-  if (data.universitet === UTLAND) return data.studieland ? 'SLF student Utland' : null;
+  if (data.universitet === UTLAND) return data.studieland ? 'SLF Student Utland' : null;
   return UNIVERSITET.find(u => u[0] === data.universitet)?.[2] ?? null;
 }
 
@@ -287,7 +288,7 @@ function studentLokalavdelning(data) {
  * ----------------------------------------------------------------
  *  • Steg 0: när alternativet väljs visas notering om att man INTE blir medlem i SLF.
  *  • Ett enda formulär (ingen stegindikator): personuppgifter (som läkarspåret),
- *    Välj förening (grupperad), Välj lokal avdelning (bara för föreningar som har sådana),
+ *    Välj förening (grupperad), Välj lokalavdelning (bara för föreningar som har sådana),
  *    infotext, kryssrutor (ST-läkare, annat yrke, pensionär, förstår utträde).
  *  • "Skicka in ansökan" (utan BankID) → kvittens för förening (ingen "redan medlem"-kontroll).
  * ================================================================ */
@@ -322,11 +323,13 @@ function lokalavdelningarFor(forening) { return FORENING_AVDELNINGAR[forening] ?
 /* ================================================================
  * VALIDERING (felhantering)
  * ----------------------------------------------------------------
- *  Principer (GOV.UK / Digg):
- *   • Validering sker när användaren klickar "Nästa steg" – aldrig medan hen skriver.
- *   • Felsammanfattning överst + felmeddelande vid varje fält. Fokus flyttas till sammanfattningen.
- *   • Rättade fel försvinner direkt; nya fel visas först vid nästa klick.
- *   • Meddelanden säger vad användaren ska göra.
+ *  Principer:
+ *   • Format kontrolleras när användaren lämnar ett ifyllt fält (on blur) – aldrig medan hen skriver.
+ *   • Tomma obligatoriska fält kontrolleras när användaren klickar "Spara och fortsätt".
+ *   • Felmeddelande under fältet (ingen sammanfattning). Fokus flyttas till första felet.
+ *   • Rättade fel försvinner direkt; ändras ett fält döljs dess fel tills fältet lämnas igen.
+ *   • Personnummer (med/utan bindestreck, 10/12 siffror) och postnummer (med/utan mellanslag)
+ *     normaliseras i stället för att ge fel. Datum kontrolleras inte i prototypen.
  *  Funktionerna returnerar { fältnamn: felmeddelande } – tomt objekt = inga fel.
  * ================================================================ */
 const digits = (v) => String(v ?? '').replace(/\D/g, '');
@@ -375,32 +378,65 @@ function personnummerFel(value, { tom, samordning = false }) {
   return null;
 }
 
+/* ---------- Formatkontroller (körs när användaren lämnar ett ifyllt fält) ----------
+ * Varje funktion får fältets värde (ej tomt) och övrig data, och returnerar felmeddelande eller null.
+ * Tomma obligatoriska fält kontrolleras först vid "Spara och fortsätt". Datum kontrolleras inte i prototypen. */
+const FORMATKONTROLL = {
+  email: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim())
+    ? null : 'Ange en e-postadress i rätt format, till exempel namn@exempel.se.',
+  landskod: (v) => /^(\+|00)?\d{1,4}$/.test(v.replace(/\s/g, ''))
+    ? null : 'Ange landskoden med + och 1–4 siffror, till exempel +46.',
+  telefon: (v, data) => {
+    if (/[^\d\s-]/.test(v)) return 'Mobilnumret får bara innehålla siffror, till exempel 701234567.';
+    const n = digits(v).replace(/^0/, '').length;
+    const svenskt = digits(data.landskod ?? '+46').replace(/^00/, '') === '46';
+    return (svenskt ? (n < 7 || n > 9) : (n < 6 || n > 14))
+      ? 'Ange ett mobilnummer med rätt antal siffror, till exempel 701234567.' : null;
+  },
+  pnr: (v) => personnummerFel(v, { tom: null }),
+  samordningsnr: (v) => personnummerFel(v, { tom: null, samordning: true })?.replace('Personnumret', 'Numret') ?? null,
+  // Med eller utan mellanslag – normaliseras till "123 45" när fältet lämnas
+  postnummer: (v) => /^[\d\s-]+$/.test(v) && digits(v).length === 5
+    ? null : 'Postnumret ska ha 5 siffror, till exempel 123 45.',
+};
+
+/* Normalisering när fältet lämnas – i stället för att ge fel på format. */
+function normaliseraVarde(name, value) {
+  if (name === 'pnr' || name === 'samordningsnr') return normaliseraPnr(value) ?? value;
+  if (name === 'postnummer') { const d = digits(value); return d.length === 5 ? `${d.slice(0, 3)} ${d.slice(3)}` : value; }
+  return value;
+}
+
+const arTom = (v) => !String(v ?? '').trim();
+
+/* Kör formatkontroll på ett fält om det är ifyllt. */
+function formatFel(name, data) {
+  const v = String(data[name] ?? '').trim();
+  return v && FORMATKONTROLL[name] ? FORMATKONTROLL[name](v, data) : null;
+}
+
+/* Kontaktuppgifter (e-post + mobilnummer) – används i steg 0 och i kontaktmodalen. */
+function valideraKontaktfalt(data) {
+  const fel = {};
+  if (arTom(data.email)) fel.email = 'Ange din e-postadress.';
+  if (arTom(data.landskod ?? '+46')) fel.landskod = 'Ange landskod, till exempel +46.';
+  if (arTom(data.telefon)) fel.telefon = 'Ange ditt mobilnummer.';
+  for (const k of ['email', 'landskod', 'telefon']) if (!fel[k]) { const f = formatFel(k, data); if (f) fel[k] = f; }
+  return fel;
+}
+
 /* Steg 0 – Välj spår och kontaktuppgifter */
 function valideraKontakt(data) {
   const fel = {};
   if (!data.spar) fel.spar = 'Välj det alternativ som passar dig bäst.';
-
-  const email = String(data.email ?? '').trim();
-  if (!email) fel.email = 'Ange din e-postadress.';
-  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) fel.email = 'Ange en e-postadress i rätt format, till exempel namn@exempel.se.';
-
-  const kod = String(data.landskod ?? '+46').replace(/\s/g, '');
-  if (!kod) fel.landskod = 'Ange landskod, till exempel +46.';
-  else if (!/^(\+|00)?\d{1,4}$/.test(kod)) fel.landskod = 'Ange landskoden med + och 1–4 siffror, till exempel +46.';
-
-  const tel = String(data.telefon ?? '').trim();
-  const telSiffror = digits(tel).replace(/^0/, '');
-  const svenskt = digits(kod).replace(/^00/, '') === '46';
-  if (!tel) fel.telefon = 'Ange ditt telefonnummer.';
-  else if (/[^\d\s-]/.test(tel)) fel.telefon = 'Telefonnumret får bara innehålla siffror, till exempel 701234567.';
-  else if (svenskt ? (telSiffror.length < 7 || telSiffror.length > 9) : (telSiffror.length < 6 || telSiffror.length > 14))
-    fel.telefon = 'Ange ett telefonnummer med rätt antal siffror, till exempel 701234567.';
-
+  Object.assign(fel, valideraKontaktfalt(data));
   if (!data.samtycke) fel.samtycke = 'Du behöver godkänna att vi behandlar dina personuppgifter för att kunna gå vidare.';
   return fel;
 }
 
-/* Steg "Uppgifter" – personnummer eller manuellt angivna namn och adress */
+/* Steg "Uppgifter" – personnummer eller manuellt angivna namn och adress.
+ * Alla fält är obligatoriska utom de som är märkta "(valfritt)".
+ * Manuell inmatning: personnummer ELLER samordningsnummer måste anges (inget av dem är valfritt). */
 function valideraUppgifter(data) {
   const fel = {};
   if (data.hamtad) return fel;
@@ -413,24 +449,21 @@ function valideraUppgifter(data) {
     return fel;
   }
 
-  if (String(data.samordningsnr ?? '').trim()) {
-    const f = personnummerFel(data.samordningsnr, { tom: null, samordning: true });
-    if (f) fel.samordningsnr = f.replace('Personnumret', 'Numret');
-  }
-  const tom = (k) => !String(data[k] ?? '').trim();
-  if (tom('fornamn')) fel.fornamn = 'Ange ditt förnamn.';
-  if (tom('efternamn')) fel.efternamn = 'Ange ditt efternamn.';
+  if (arTom(data.pnr) && arTom(data.samordningsnr)) fel.samordningsnr = 'Ange personnummer eller samordningsnummer.';
+  for (const k of ['pnr', 'samordningsnr']) { const f = formatFel(k, data); if (f) fel[k] = f; }
+
+  if (arTom(data.fornamn)) fel.fornamn = 'Ange ditt förnamn.';
+  if (arTom(data.efternamn)) fel.efternamn = 'Ange ditt efternamn.';
 
   if (data.borISverige === 'nej') {
-    if (tom('adressrad1')) fel.adressrad1 = 'Ange din adress.';
-    if (tom('ortUtl')) fel.ortUtl = 'Ange ort.';
-    if (tom('land')) fel.land = 'Ange land.';
+    if (arTom(data.adressrad1)) fel.adressrad1 = 'Ange din adress.';
+    if (arTom(data.ortUtl)) fel.ortUtl = 'Ange ort.';
+    if (arTom(data.land)) fel.land = 'Ange land.';
   } else {
-    if (tom('gatuadress')) fel.gatuadress = 'Ange din gatuadress.';
-    const pnr = String(data.postnummer ?? '').trim();
-    if (!pnr) fel.postnummer = 'Ange ditt postnummer.';
-    else if (!/^\d{3}\s?\d{2}$/.test(pnr)) fel.postnummer = 'Postnumret ska ha 5 siffror, till exempel 123 45.';
-    if (tom('ort')) fel.ort = 'Ange ort.';
+    if (arTom(data.gatuadress)) fel.gatuadress = 'Ange din gatuadress.';
+    if (arTom(data.postnummer)) fel.postnummer = 'Ange ditt postnummer.';
+    else { const f = formatFel('postnummer', data); if (f) fel.postnummer = f; }
+    if (arTom(data.ort)) fel.ort = 'Ange ort.';
   }
   return fel;
 }
@@ -441,10 +474,50 @@ function valideraHamta(data) {
   return f ? { pnr: f } : {};
 }
 
+/* Läkare steg 2 – Utbildning (datumformat kontrolleras inte i prototypen) */
+function valideraUtbildning(data) {
+  const fel = {};
+  if (arTom(data.examensdatum)) fel.examensdatum = 'Ange datum för din läkarexamen.';
+  if (showLegitimationQuestion(data) && !data.svenskLeg) fel.svenskLeg = 'Svara på om du har svensk läkarlegitimation.';
+  if (showAttachment(data) && !(data.legFiler ?? []).length) fel.legFiler = 'Bifoga minst en PDF-fil med dokumentation.';
+  return fel;
+}
 
-/* Föreningsansökan: personuppgifter + obligatorisk kryssruta om utträde */
+/* Läkare steg 3 – Yrke. Följer den stegvisa visningen: bara synliga frågor kontrolleras. */
+function lanFragorKlara(data) {
+  if (!data.lan) return false;
+  if (data.lan === 'skane' && !data.kommun) return false;
+  if (sektionerFor(data.lan) && !data.sektion) return false;
+  return true;
+}
+function valideraYrke(data) {
+  const fel = {};
+  if (saknarSvenskLeg(data)) return fel;
+  if (!data.lan) fel.lan = 'Välj i vilket län du har din primära arbetsplats.';
+  else if (data.lan === 'skane' && !data.kommun) fel.kommun = 'Välj i vilken kommun du jobbar.';
+  else if (sektionerFor(data.lan) && !data.sektion) fel.sektion = 'Välj sektion för din lokalavdelning.';
+  else if (!data.specialist) fel.specialist = 'Svara på om du är färdig specialistläkare.';
+  else if (data.specialist === 'ja' && !data.yrkesforening) fel.yrkesforening = 'Välj yrkesförening.';
+  return fel;
+}
+
+/* Student steg 2 – Utbildning. Alla inmatningsfält är obligatoriska. */
+function valideraStudentUtbildning(data) {
+  const fel = {};
+  if (!data.universitet) fel.universitet = 'Välj ditt universitet.';
+  if (data.universitet === UTLAND) {
+    if (arTom(data.universitetUtl)) fel.universitetUtl = 'Ange vilket universitet du studerar vid.';
+    if (!data.studieland) fel.studieland = 'Välj i vilket land du studerar.';
+  }
+  if (studentLokalavdelning(data) && arTom(data.examensdatumStudent)) fel.examensdatumStudent = 'Ange förväntat examensdatum.';
+  return fel;
+}
+
+/* Föreningsansökan: personuppgifter + förening (+ lokalavdelning) + obligatorisk kryssruta om utträde */
 function valideraForening(data) {
   const fel = valideraUppgifter(data);
+  if (!data.forening) fel.forening = 'Välj vilken förening du vill bli medlem i.';
+  else if (lokalavdelningarFor(data.forening) && !data.foreningAvdelning) fel.foreningAvdelning = 'Välj lokalavdelning.';
   if (!data.forstarUttrade) fel.forstarUttrade = 'Du behöver bekräfta att du har förstått hur utträde går till för att kunna skicka in ansökan.';
   return fel;
 }

@@ -32,7 +32,7 @@ const ICON = {
   pin: '<svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>',
   search: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><circle cx="10" cy="10" r="6"/><path d="M14.5 14.5L20 20"/></svg>',
   menu: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
-  warning: '<svg class="error-icon" viewBox="0 0 24 22" aria-hidden="true"><path d="M10.3 1.9a2 2 0 0 1 3.4 0l9.6 16.6a2 2 0 0 1-1.7 3H2.4a2 2 0 0 1-1.7-3z" fill="currentColor"/><path d="M12 7.5v6" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="17.3" r="1.3" fill="#fff"/></svg>',
+  warning: '<svg class="error-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="10" fill="currentColor"/><path d="M10 5v6" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/><circle cx="10" cy="14.7" r="1.3" fill="#fff"/></svg>',
   chevronLeft: '<svg viewBox="0 0 10 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 1L2 8l6 7"/></svg>',
   check: '<svg viewBox="0 0 16 16" fill="none" stroke="#1f1f1f" stroke-width="2.2"><path d="M2 8.5l4 4 8-9"/></svg>',
   badge: '<svg viewBox="0 0 28 28" fill="none" stroke="#1f1f1f" stroke-width="1.5"><path d="M14 2l3 2.4 3.8-.4 1.2 3.6 3.3 2-1.1 3.6 1.1 3.6-3.3 2-1.2 3.6-3.8-.4L14 26l-3-2.4-3.8.4L6 20.4l-3.3-2L3.8 14.8 2.7 11.2l3.3-2L7.2 5.6l3.8.4z"/><path d="M9.5 14.5l3 3 6-6.5"/></svg>',
@@ -109,7 +109,7 @@ const SCREENS = {
               </div>
 
               <div class="field${errClass('telefon')}${errClass('landskod')}">
-                <label class="label" id="phone-label" for="f-telefon">Telefonnummer</label>
+                <label class="label" id="phone-label" for="f-telefon">Mobilnummer</label>
                 <div class="phone">
                   <div class="input-wrap">
                     <input id="f-landskod" name="landskod" type="tel" inputmode="tel" autocomplete="tel-country-code" aria-label="Landskod" value="${esc(state.landskod ?? '+46')}" ${errAttrs('landskod')}>
@@ -132,10 +132,7 @@ const SCREENS = {
               </div>
             </form>
 
-            <div class="actions actions-split">
-              <button class="btn-back" type="button" data-action="back">${ICON.chevronLeft} Tillbaka</button>
-              <button class="btn-primary" type="submit" form="form">Nästa steg</button>
-            </div>
+            ${stegKnappar()}
       </div>`,
     mount: (root) => {
       const form = root.querySelector('#form');
@@ -158,7 +155,7 @@ const SCREENS = {
   'lakare-utbildning': {
     layout: 'narrow',
     render: () => {
-      if (!state.examensland) state.examensland = 'se'; // Sverige förvalt
+      if (!state.examensland) state.examensland = 'se'; // Sverige förvalt (beslut: undantag från "inget förval")
       const land = COUNTRIES.find(c => c[0] === state.examensland);
       const visaLeg = showLegitimationQuestion(state);
       const visaBifoga = showAttachment(state);
@@ -168,13 +165,14 @@ const SCREENS = {
         <h1 class="step-title">Medlemsansökan läkare</h1>
         ${stepper(STEPS_LAKARE, 1)}
         <form class="card" id="form" novalidate>
-          <div class="field">
+          <div class="field${errClass('examensdatum')}">
             <label for="f-examensdatum">Datum för läkarexamen</label>
             <div class="input-wrap">
               <button type="button" class="prefix-btn" data-action="kalender" aria-label="Öppna kalender">${ICON.calendar}</button>
-              <input id="f-examensdatum" name="examensdatum" inputmode="numeric" placeholder="ÅÅÅÅMMDD" value="${esc(state.examensdatum)}">
+              <input id="f-examensdatum" name="examensdatum" inputmode="numeric" placeholder="ÅÅÅÅMMDD" value="${esc(state.examensdatum)}" ${errAttrs('examensdatum')}>
               <input type="date" id="datepicker" class="visually-hidden" tabindex="-1" aria-hidden="true">
             </div>
+            ${errMsg('examensdatum')}
           </div>
 
           <div class="field">
@@ -188,30 +186,23 @@ const SCREENS = {
             </div>
           </div>
 
-          ${visaLeg ? `
-            <fieldset class="options options-tight">
-              <legend class="field-legend">Har du svenskt läkarlegitimation?</legend>
-              ${radio('svenskLeg', 'ja', 'Ja')}
-              ${radio('svenskLeg', 'nej', 'Nej')}
-            </fieldset>` : ''}
+          ${visaLeg ? radioGrupp('svenskLeg', 'Har du svenskt läkarlegitimation?', [['ja', 'Ja'], ['nej', 'Nej']]) : ''}
 
           ${visaBifoga ? `
-            <div class="upload">
+            <div class="upload${errClass('legFiler')}">
               <p class="field-legend">Bifoga dokumentation för legitimationsvillkor</p>
               <p class="hint">En eller flera PDF-filer kan bifogas. Total max filstorlek är 4,5 MB.</p>
               ${filer.length ? `<ul class="files">${filer.map((f, i) => `
                 <li><span>${esc(f.name)} (${formatMB(f.size)})</span>
                   <button type="button" class="icon-btn" data-action="taBortFil" data-index="${i}" aria-label="Ta bort ${esc(f.name)}">${ICON.closeSmall}</button></li>`).join('')}</ul>` : ''}
               <label class="btn-outline">Välj fil
-                <input type="file" id="fil" accept="application/pdf,.pdf" multiple class="visually-hidden">
+                <input type="file" id="fil" accept="application/pdf,.pdf" multiple class="visually-hidden" ${errAttrs('legFiler')}>
               </label>
+              ${errMsg('legFiler')}
             </div>` : ''}
         </form>
 
-        <div class="actions actions-split">
-          <button class="btn-back" type="button" data-action="back">${ICON.chevronLeft} Tillbaka</button>
-          <button class="btn-primary" type="submit" form="form">Nästa steg</button>
-        </div>
+        ${stegKnappar()}
       </div>`;
     },
     mount: (root) => {
@@ -221,16 +212,17 @@ const SCREENS = {
         if (e.target.id === 'fil') {
           // Filen laddas inte upp i prototypen – bara namn och storlek sparas
           const nya = [...e.target.files].map(f => ({ name: f.name, size: f.size }));
-          state.legFiler = [...(state.legFiler ?? []), ...nya]; saveState(); rerender(); return;
+          state.legFiler = [...(state.legFiler ?? []), ...nya]; saveState(); pruneErrors(current()); rerender(); return;
         }
         if (e.target.id === 'datepicker') {
-          state.examensdatum = e.target.value; saveState(); rerender(); return;
+          state.examensdatum = e.target.value; saveState(); pruneErrors(current()); rerender(); return;
         }
-        if (['examensland', 'svenskLeg'].includes(e.target.name)) { collect(form); rerender(); }
+        if (['examensland', 'svenskLeg'].includes(e.target.name)) { collect(form); pruneErrors(current()); rerender(); }
       });
       form.addEventListener('submit', (e) => {
         e.preventDefault();
         collect(form);
+        if (!validera('lakare-utbildning')) return;
         goNext('lakare-utbildning');
       });
     },
@@ -244,6 +236,7 @@ const SCREENS = {
       },
     },
     back: 'lakare-uppgifter',
+    validate: valideraUtbildning,
     fields: ['examensdatum', 'examensland', 'svenskLeg', 'legFiler'],
   },
 
@@ -253,61 +246,58 @@ const SCREENS = {
       let body;
       if (saknarSvenskLeg(state)) {
         body = `
-          <h2 class="card-heading">Lokal- och yrkesföreningar</h2>
-          <p>Medlemmar i Läkarförbundet som har svensk läkarlegitimation blir också medlemmar i lokal- och yrkesföreningar.</p>
-          <p>När du har fått din läkarlegitimation kommer du få information om att du kan kontakta oss för att lägga till lokal- och yrkesföreningar. Dessa kommer säkra att du får expertstöd i allt från din lokala arbetsmiljö till din karriärspecifika utveckling. Det garanterar att du får rätt hjälp oavsett om frågan rör din specifika arbetsplats eller din yrkesroll.</p>`;
+          <h2 class="card-heading">Lokalavdelningar och yrkesföreningar</h2>
+          <p>Medlemmar i Läkarförbundet som har svensk läkarlegitimation blir också medlemmar i en lokalavdelning och en yrkesförening.</p>
+          <p>När du har fått din läkarlegitimation kommer du få information om att du kan kontakta oss för att lägga till lokalavdelning och yrkesförening. Dessa kommer säkra att du får expertstöd i allt från din lokala arbetsmiljö till din karriärspecifika utveckling. Det garanterar att du får rätt hjälp oavsett om frågan rör din specifika arbetsplats eller din yrkesroll.</p>`;
       } else {
+        // Stegvis visning: län → (kommun / sektion) → specialistfrågan → yrkesförening
         const lokal = lokalforening(state);
         const sektioner = sektionerFor(state.lan);
         const lokalavd = lokalavdelning(state);
+        const visaSpecialist = lanFragorKlara(state);
+        const yrkesforening = state.specialist === 'nej' ? 'Sveriges yngre läkares förening SYLF'
+          : state.specialist === 'ja' ? state.yrkesforening : null;
         body = `
           <h2 class="card-heading">Hitta dina föreningar</h2>
-          <p>Läkarförbundet har 25 lokalföreningar spridda över hela landet. Som läkare och medlem i Läkarförbundet, tillhör du den lokalförening som är verksam där du arbetar.</p>
+          <p>Läkarförbundet har 25 lokalavdelningar spridda över hela landet. Som läkare och medlem i Läkarförbundet, tillhör du den lokalavdelning som är verksam där du arbetar.</p>
           <p>I ditt medlemskap ingår också ett medlemskap i en av våra åtta yrkesföreningar. En yrkesförening driver frågor som är knutet till din ställning och plats i yrket.</p>
 
           ${dropdown('lan', 'I vilket län har du din primära arbetsplats?', 'Välj län',
               LAN.map(([value, label]) => ({ value, label })))}
 
           ${state.lan === 'skane' ? dropdown('kommun', 'I vilken kommun jobbar du?', 'Välj kommun',
-              SKANE_KOMMUNER.map(([namn]) => ({ value: namn, label: namn }))) : ''}
+              SKANE_KOMMUNER.map(([namn]) => ({ value: namn, label: namn })), { reveal: 'kommun' }) : ''}
 
-          ${lokal ? infoBox(`Din lokalförening är <strong>${lokal}.</strong>`) : ''}
+          ${lokal ? infoBox(`Din lokalavdelning är <strong>${lokal}.</strong>`, 'lokal') : ''}
 
-          ${sektioner ? dropdown('sektion', 'Välj sektion för din lokalförening baserat på din arbetsplats', 'Välj sektion', sektioner) : ''}
+          ${sektioner ? dropdown('sektion', 'Välj sektion för din lokalavdelning baserat på din arbetsplats', 'Välj sektion', sektioner, { reveal: 'sektion' }) : ''}
 
-          <fieldset class="options options-tight">
-            <legend class="field-legend">Är du färdig specialistläkare?</legend>
-            ${radio('specialist', 'ja', 'Ja')}
-            ${radio('specialist', 'nej', 'Nej')}
-          </fieldset>
+          ${visaSpecialist ? `
+            ${radioGrupp('specialist', 'Är du färdig specialistläkare?', [['ja', 'Ja'], ['nej', 'Nej']], { reveal: 'specialist' })}
 
-          ${state.specialist === 'nej' ? infoBox('Din yrkesförening är <strong>Sveriges yngre läkares förening SYLF.</strong>') : ''}
+            ${state.specialist === 'ja' ? dropdown('yrkesforening', 'Välj yrkesförening', 'Välj yrkesförening',
+                YRKESFORENINGAR.map(n => ({ value: n, label: n })), { reveal: 'yrkesforening' }) : ''}
 
-          ${state.specialist === 'ja' ? dropdown('yrkesforening', 'Välj yrkesförening', 'Välj yrkesförening',
-              YRKESFORENINGAR.map(n => ({ value: n, label: n }))) : ''}
-
-          ${state.specialist === 'ja' && state.yrkesforening ? infoBox(lokalavd
-              ? `Din lokalavdelning i din yrkesförening är<br><strong>${lokalavd}.</strong>`
-              : `Din yrkesförening är <strong>${state.yrkesforening}.</strong>`) : ''}`;
+            ${yrkesforening ? infoBox(`Din yrkesförening är <strong>${yrkesforening}.</strong>${lokalavd
+                ? ` Din lokalavdelning är <strong>${lokalavd}.</strong>` : ''}`, 'yrkesbox') : ''}` : ''}`;
       }
       return `
       <div class="page narrow">
         <h1 class="step-title">Medlemsansökan läkare</h1>
         ${stepper(STEPS_LAKARE, 2)}
         <form class="card card-text" id="form" novalidate>${body}</form>
-        <div class="actions actions-split">
-          <button class="btn-back" type="button" data-action="back">${ICON.chevronLeft} Tillbaka</button>
-          <button class="btn-primary" type="submit" form="form">Nästa steg</button>
-        </div>
+        ${stegKnappar()}
       </div>`;
     },
     mount: (root) => {
       const form = root.querySelector('#form');
       form.addEventListener('change', (e) => {
-        if (e.target.name === 'specialist') { collect(form); rerender(); }
+        if (e.target.name === 'specialist') { collect(form); pruneErrors(current()); rerender(); }
       });
       form.addEventListener('submit', (e) => {
         e.preventDefault();
+        collect(form);
+        if (!validera('lakare-yrke')) return;
         goNext('lakare-yrke');
       });
     },
@@ -316,6 +306,7 @@ const SCREENS = {
       if (name === 'lan') { delete state.kommun; delete state.sektion; }
     },
     back: 'lakare-utbildning',
+    validate: valideraYrke,
     fields: ['lan', 'kommun', 'sektion', 'specialist', 'yrkesforening'],
   },
 
@@ -330,8 +321,8 @@ const SCREENS = {
 
       const lokalavd = lokalavdelning(state);
       const foreningar = [
-        ['Lokalförening', lokalforening(state)],
-        ['Sektion för lokalförening', sektionerFor(state.lan)?.find(x => x.value === state.sektion)?.label],
+        ['Lokalavdelning', lokalforening(state)],
+        ['Sektion för lokalavdelning', sektionerFor(state.lan)?.find(x => x.value === state.sektion)?.label],
         ['Yrkesförening', state.specialist === 'nej' ? 'Sveriges yngre läkares förening SYLF' : state.yrkesforening],
         ['Lokalavdelning för yrkesförening', lokalavd],
       ].filter(([, v]) => v).map(([k, v]) => [k, esc(v)]);
@@ -343,28 +334,25 @@ const SCREENS = {
         <p class="review-intro">Kontrollera att uppgifterna nedan stämmer innan du skickar in din medlemsansökan.</p>
 
         ${summaryCard('Dina uppgifter', manuell ? 'lakare-uppgifter' : null, uppgifter)}
-        ${summaryCard('Dina kontaktuppgifter', 'valj-spar', [
-          ['E-postadress', esc(state.email) || '–'],
-          ['Telefonnummer', formatPhone(state.landskod, state.telefon) || '–'],
-        ])}
+        ${kontaktKort()}
         ${summaryCard('Din läkarexamen', 'lakare-utbildning', [
           ['Datum för läkarexamen', esc(state.examensdatum) || '–'],
           ['Land för läkarexamen', land || '–'],
         ])}
         ${saknarSvenskLeg(state) ? '' : summaryCard('Dina föreningar', 'lakare-yrke', foreningar.length ? foreningar : [['Föreningar', '–']],
-          disclosure('merInfoForeningar', 'Mer information om lokal- och yrkesföreningar', `
-            <p>Förutom att du blir medlem i vårt fackförbund Sveriges Läkarförening blir du också medlem i lokal- och yrkesföreningar. Här måste vi också förtydliga att man måste vara med i dessa föreningar. Det kostar inget extra för medlemskap i sektioner för lokalföreningar, men några sektioner för yrkesföreningar tar en avgift.</p>`))}
+          disclosure('merInfoForeningar', 'Mer information om lokalavdelningar och yrkesföreningar', `
+            <p>Förutom att du blir medlem i vårt fackförbund Sveriges Läkarförening blir du också medlem i en lokalavdelning och en yrkesförening. Här måste vi också förtydliga att man måste vara med i dessa föreningar. Det kostar inget extra för medlemskap i sektioner för lokalavdelningar, men några sektioner för yrkesföreningar tar en avgift.</p>`))}
 
         <section class="card summary summary-fee">
           <h2>Månadsavgift</h2>
           <p class="fee-text">${saknarSvenskLeg(state)
             ? 'Om du är utbildad till läkare utomlands, men ännu inte fått din svenska läkarlegitimation betalar du en lägre medlemsavgift.'
-            : 'Din månadsavgift baseras på typ av medlemskap samt vilka lokal- och yrkesföreningar du blir medlem i.'}</p>
+            : 'Din månadsavgift baseras på typ av medlemskap samt vilken lokalavdelning och yrkesförening du blir medlem i.'}</p>
           <dl class="summary-list summary-fee-list"><dt>Avgift</dt><dd>${manadsavgift(state)} kr</dd></dl>
           ${disclosure('visaIngar', 'Vad ingår i medlemskapet?', `
-            <p>Din månadsavgift baseras på typ av medlemskap samt vilka lokal- och yrkesföreningar du blir medlem i. Inkluderat i medlemskapet är bland annat:</p>
+            <p>Din månadsavgift baseras på typ av medlemskap samt vilken lokalavdelning och yrkesförening du blir medlem i. Inkluderat i medlemskapet är bland annat:</p>
             <ul>
-              <li>Medlemskap i Läkarförbundet, lokal- och yrkesförening inkl. ev sektioner</li>
+              <li>Medlemskap i Läkarförbundet, lokalavdelning och yrkesförening inkl. ev sektioner</li>
               <li>Inkomstförsäkring via Folksam</li>
               <li>Läkartidningen 10 ggr/år</li>
               <li>Möjlighet att hyra förbundets egna fritidsboenden</li>
@@ -372,21 +360,11 @@ const SCREENS = {
             <p>Notera att medlemskap i Läkarförbundet inte inkluderar a-kassa, och någonting mer om detta.</p>`)}
         </section>
 
-        <div class="actions actions-split">
-          <button class="btn-back" type="button" data-action="back">${ICON.chevronLeft} Tillbaka</button>
-          <button class="btn-primary btn-submit" type="button" data-action="skicka">${bankid ? ICON.bankid : ''}<span>Skicka in ansökan</span></button>
-        </div>
-
-        ${bankid ? `
-          <div class="no-bankid">
-            ${disclosure('utanBankid', 'Jag har inte BankID', `
-              <p>Du kan bli medlem i Sveriges Läkarförbund även om du inte har BankId. Skicka in ansökan nedan så kontaktar vi dig för nästa steg.</p>
-              <button class="btn-primary btn-small" type="button" data-action="skicka">Skicka in ansökan</button>`)}
-          </div>` : ''}
+        ${signeraKnappar(bankid)}
       </div>`;
     },
     actions: {
-      andra: (btn) => { state.returnTo = current(); saveState(); go(btn.dataset.target); },
+      andra: andra,
       toggle: (btn) => { state[btn.dataset.key] = !state[btn.dataset.key]; saveState(); rerender(); },
       skicka: () => go(nextScreen('lakare-signera', state)),
     },
@@ -414,30 +392,29 @@ const SCREENS = {
             ${textField('universitetUtl', 'Universitet (utomlands)', {})}
             ${dropdown('studieland', 'Land', 'Välj land', COUNTRIES.filter(c => c[0] !== 'se').map(([value, label]) => ({ value, label })))}` : ''}
           ${avd ? `
-            ${infoBox(`Din lokalavdelning är <strong>${avd}.</strong>`)}
-            <div class="field">
+            ${infoBox(`Din yrkesförening är <strong>${STUDENT_YRKESFORENING}.</strong> Din lokalavdelning är <strong>${avd}.</strong>`)}
+            <div class="field${errClass('examensdatumStudent')}">
               <label for="f-examensdatumStudent">Förväntat examensdatum</label>
               <div class="input-wrap">
                 <button type="button" class="prefix-btn" data-action="kalender" aria-label="Öppna kalender">${ICON.calendar}</button>
-                <input id="f-examensdatumStudent" name="examensdatumStudent" inputmode="numeric" placeholder="ÅÅÅÅ-MM-DD" value="${esc(state.examensdatumStudent)}">
+                <input id="f-examensdatumStudent" name="examensdatumStudent" inputmode="numeric" placeholder="ÅÅÅÅ-MM-DD" value="${esc(state.examensdatumStudent)}" ${errAttrs('examensdatumStudent')}>
                 <input type="date" id="datepicker" class="visually-hidden" tabindex="-1" aria-hidden="true">
               </div>
+              ${errMsg('examensdatumStudent')}
             </div>` : ''}
         </form>
-        <div class="actions actions-split">
-          <button class="btn-back" type="button" data-action="back">${ICON.chevronLeft} Tillbaka</button>
-          <button class="btn-primary" type="submit" form="form">Nästa steg</button>
-        </div>
+        ${stegKnappar()}
       </div>`;
     },
     mount: (root) => {
       const form = root.querySelector('#form');
       form.addEventListener('input', () => collect(form));
       form.addEventListener('change', (e) => {
-        if (e.target.id === 'datepicker') { state.examensdatumStudent = e.target.value; saveState(); rerender(); }
+        if (e.target.id === 'datepicker') { state.examensdatumStudent = e.target.value; saveState(); pruneErrors(current()); rerender(); }
       });
       form.addEventListener('submit', (e) => {
         e.preventDefault(); collect(form);
+        if (!validera('student-utbildning')) return;
         goNext('student-utbildning');
       });
     },
@@ -449,6 +426,7 @@ const SCREENS = {
       if (name === 'universitet' && value !== UTLAND) { delete state.universitetUtl; delete state.studieland; }
     },
     back: 'student-uppgifter',
+    validate: valideraStudentUtbildning,
     fields: ['universitet', 'universitetUtl', 'studieland', 'examensdatumStudent'],
   },
 
@@ -467,24 +445,18 @@ const SCREENS = {
         <p class="review-intro">Kontrollera att uppgifterna nedan stämmer innan du skickar in din medlemsansökan.</p>
 
         ${summaryCard('Dina uppgifter', harManuellaUppgifter(state) ? 'student-uppgifter' : null, uppgiftsRader())}
-        ${summaryCard('Dina kontaktuppgifter', 'valj-spar', [
-          ['E-postadress', esc(state.email) || '–'],
-          ['Telefonnummer', formatPhone(state.landskod, state.telefon) || '–'],
-        ])}
+        ${kontaktKort()}
         ${summaryCard('Din utbildning', 'student-utbildning', [
           ['Universitet', esc(univ) || '–'],
           ['Förväntat examensdatum', esc(state.examensdatumStudent) || '–'],
         ])}
-
-        <section class="card summary summary-plain">
-          <div class="summary-head"><h2>Dina föreningar</h2></div>
-          <ul class="plain-list">
-            <li>Sveriges läkarförbund student</li>
-            ${avd ? `<li>${avd}</li>` : ''}
-          </ul>
-          ${disclosure('merInfoStudentForeningar', 'Mer information om dina föreningar', `
-            <p>[Text saknas i skissen] Som medlem i Sveriges läkarförbund student blir du automatiskt medlem i lokalavdelningen vid ditt lärosäte.</p>`)}
-        </section>
+        ${summaryCard('Dina föreningar', null, [
+          ['Yrkesförening', STUDENT_YRKESFORENING],
+          ['Lokalavdelning', esc(avd) || '–'],
+        ],
+          // TODO: slutlig text kommer från SLF
+          disclosure('varforYrkesforening', 'Varför blir jag medlem i en yrkesförening?', `
+            <p>Som medlem i Sveriges Läkarförbund blir du också medlem i en yrkesförening och en lokalavdelning. Yrkesföreningen samlar läkare i samma yrkesskede, och lokalavdelningen finns nära dig.</p>`))}
 
         <section class="card summary summary-plain">
           <div class="summary-head"><h2>Årsavgift</h2></div>
@@ -493,7 +465,7 @@ const SCREENS = {
           ${disclosure('visaIngarStudent', 'Vad ingår i medlemskapet?', `
             <p>[Text saknas i skissen] Inkluderat i studentmedlemskapet är bland annat:</p>
             <ul>
-              <li>Medlemskap i Sveriges läkarförbund student och din lokalavdelning</li>
+              <li>Medlemskap i ${STUDENT_YRKESFORENING} och din lokalavdelning</li>
               <li>Råd och stöd under studietiden</li>
             </ul>`)}
         </section>
@@ -507,18 +479,7 @@ const SCREENS = {
           </label>
         </section>
 
-        <div class="actions actions-split">
-          <button class="btn-back" type="button" data-action="back">${ICON.chevronLeft} Tillbaka</button>
-          <button class="btn-primary btn-submit" type="button" data-action="skicka">${bankid ? ICON.bankid : ''}<span>Skicka in ansökan</span></button>
-        </div>
-
-        ${bankid ? `
-          <div class="no-bankid">
-            ${disclosure('utanBankid', 'Jag har inte BankID', `
-              <p>Du kan bli medlem i Sveriges Läkarförbund även om du inte har BankId.</p>
-              <p>Skicka in ansökan nedan så kontaktar vi dig för nästa steg.</p>
-              <button class="btn-primary btn-small" type="button" data-action="skicka">Skicka in ansökan</button>`)}
-          </div>` : ''}
+        ${signeraKnappar(bankid)}
       </div>`;
     },
     mount: (root) => {
@@ -527,13 +488,13 @@ const SCREENS = {
       });
     },
     actions: {
-      andra: (btn) => { state.returnTo = current(); saveState(); go(btn.dataset.target); },
+      andra: andra,
       toggle: (btn) => { state[btn.dataset.key] = !state[btn.dataset.key]; saveState(); rerender(); },
       skicka: () => go(nextScreen('student-signera', state)),
       lakartidningen: () => {}, // hanteras av change-lyssnaren
     },
     back: 'student-utbildning',
-    fields: ['merInfoStudentForeningar', 'visaIngarStudent', 'lakartidningen', 'utanBankid'],
+    fields: ['varforYrkesforening', 'visaIngarStudent', 'lakartidningen', 'utanBankid'],
     protoTools: () => [uppgiftsVaxel('sverige')],
   },
 
@@ -553,8 +514,8 @@ const SCREENS = {
             ...FORENINGAR.specialitet.map(n => ({ value: n, label: n })),
             { group: 'Intresseföreningar' },
             ...FORENINGAR.intresse.map(n => ({ value: n, label: n })),
-          ])}
-          ${avdelningar ? dropdown('foreningAvdelning', 'Välj lokal avdelning', 'Välj lokal avdelning',
+          ], { searchable: true })}
+          ${avdelningar ? dropdown('foreningAvdelning', 'Välj lokalavdelning', 'Välj lokalavdelning',
               avdelningar.map(n => ({ value: n, label: n }))) : ''}
           <p>Om du vill bli medlem i fler än en specialitets- och intresseförening får du göra ytterligare ansökningar.</p>
           <p>Här kan du endast gå med i de föreningar som är kopplade till Läkarförbundets webbnätverk. Letar du efter en annan förening <a href="#" onclick="return false">hittar du dem här</a>.</p>
@@ -669,15 +630,52 @@ function summaryCard(title, editTarget, rows, extra = '') {
     </section>`;
 }
 
+function kontaktKort() {
+  return summaryCard('Dina kontaktuppgifter', 'valj-spar', [
+    ['E-postadress', esc(state.email) || '–'],
+    ['Mobilnummer', formatPhone(state.landskod, state.telefon) || '–'],
+  ]);
+}
+
+/* "Ändra" i granskningen: kom ihåg granskningen så att steget visar "Klar" och leder tillbaka hit. */
+function andra(btn) {
+  if (KONTAKT_I_MODAL && btn.dataset.target === 'valj-spar') { oppnaKontaktModal(); return; }
+  state.returnTo = current(); saveState(); go(btn.dataset.target);
+}
+
+/* Tillbaka + primärknapp i stegen. Kom man via "Ändra" i granskningen heter knappen "Klar". */
+function stegKnappar() {
+  return `
+    <div class="actions actions-split">
+      <button class="btn-back" type="button" data-action="back">${ICON.chevronLeft} Tillbaka</button>
+      <button class="btn-primary" type="submit" form="form">${state.returnTo ? 'Klar' : 'Spara och fortsätt'}</button>
+    </div>`;
+}
+
+function signeraKnappar(bankid) {
+  return `
+    <div class="actions actions-split">
+      <button class="btn-back" type="button" data-action="back">${ICON.chevronLeft} Tillbaka</button>
+      <button class="btn-primary btn-submit" type="button" data-action="skicka">${bankid ? ICON.bankid : ''}<span>Skicka in ansökan</span></button>
+    </div>
+
+    ${bankid ? `
+      <div class="no-bankid">
+        ${disclosure('utanBankid', 'Jag har inte BankID', `
+          <!-- TODO: platshållartext – byt mot slutlig copy från SLF -->
+          <p>Utan BankID kan du inte skicka in ansökan digitalt. Kontakta medlemsservice så hjälper vi dig.</p>`)}
+      </div>` : ''}`;
+}
+
 function disclosure(key, label, content) {
   const open = !!state[key];
   return `
     <div class="disclosure-block">
-      <button type="button" class="disclosure strong" aria-expanded="${open}" data-action="toggle" data-key="${key}">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 2l6 6-6 6"/></svg>
+      <button type="button" class="disclosure strong" aria-expanded="${open}" aria-controls="disc-${key}" data-action="toggle" data-key="${key}">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 2l6 6-6 6"/></svg>
         ${label}
       </button>
-      ${open ? `<div class="disclosure-content">${content}</div>` : ''}
+      <div class="disclosure-content" id="disc-${key}" ${open ? '' : 'hidden'}>${content}</div>
     </div>`;
 }
 
@@ -691,36 +689,77 @@ function formatPhone(kod, nr) {
   return `+${kodSiffror} ${grouped}`;
 }
 
-function infoBox(html) {
-  return `<div class="info-box" role="status">${html}</div>`;
+function infoBox(html, reveal) {
+  return `<div class="info-box" role="status" ${revealAttr(reveal)}>${html}</div>`;
 }
 
+/* Element som dyker upp efter ett svar får data-reveal och tonas in (se animeraNya). */
+const revealAttr = (key) => key ? `data-reveal="${key}"` : '';
+
 /* Anpassad rullgardin (som i skisserna): rader med avdelare, bock på valt alternativ,
- * valfri fetstilt rubrik + beskrivning. Väljs via data-action="dd-select". */
-function dropdown(name, label, placeholder, options) {
+ * valfri fetstilt rubrik + beskrivning. Väljs via data-action="dd-select".
+ * Ingen platshållarrad i listan och inget förval – fältet visar grå platshållartext tills man väljer.
+ * searchable: fältet blir ett sökfält när listan är öppen; listan filtreras på det man skriver.
+ * Tangentbord: pil upp/ned, Enter väljer, Esc stänger. */
+function dropdown(name, label, placeholder, options, { searchable = false, reveal } = {}) {
   const sel = options.find(o => !o.group && o.value === state[name]);
   const text = sel ? (sel.desc ? `${sel.label} - ${sel.desc}` : sel.label) : placeholder;
   const open = openDropdown === name;
-  return `
-    <div class="field dd ${open ? 'is-open' : ''}" data-dd="${name}">
-      <span class="label" id="dd-${name}-label">${label}</span>
-      <button type="button" class="dd-toggle ${sel ? '' : 'is-placeholder'}" data-action="dd-toggle" data-name="${name}"
-        aria-haspopup="listbox" aria-expanded="${open}" aria-labelledby="dd-${name}-label dd-${name}-value">
+  const falt = open && searchable ? `
+      <div class="dd-toggle dd-combo">
+        <input class="dd-search" id="f-${name}" type="text" role="combobox" autocomplete="off" spellcheck="false"
+          aria-expanded="true" aria-controls="dd-${name}-list" aria-autocomplete="list" aria-labelledby="dd-${name}-label"
+          placeholder="${esc(sel ? text : 'Skriv för att söka eller välj i listan')}">
+        <button type="button" class="dd-chev-btn" data-action="dd-toggle" data-name="${name}" aria-label="Stäng listan" tabindex="-1">${ICON.chevronDownLarge}</button>
+      </div>` : `
+      <button type="button" id="f-${name}" class="dd-toggle ${sel ? '' : 'is-placeholder'}" data-action="dd-toggle" data-name="${name}"
+        aria-haspopup="listbox" aria-expanded="${open}" aria-labelledby="dd-${name}-label dd-${name}-value" ${errAttrs(name).replace('aria-invalid="true" ', '')}>
         <span id="dd-${name}-value">${esc(text)}</span>${ICON.chevronDownLarge}
-      </button>
+      </button>`;
+  return `
+    <div class="field dd ${open ? 'is-open' : ''}${errClass(name)}" data-dd="${name}" ${revealAttr(reveal)}>
+      <span class="label" id="dd-${name}-label">${label}</span>
+      ${falt}
       ${open ? `
-        <ul class="dd-list" role="listbox" aria-labelledby="dd-${name}-label">
-          <li><button type="button" role="option" class="is-placeholder" data-action="dd-select" data-name="${name}" data-value=""><span>${placeholder}</span></button></li>
-          ${options.map(o => o.group ? `
+        <ul class="dd-list" id="dd-${name}-list" role="listbox" aria-labelledby="dd-${name}-label">
+          ${options.map((o, i) => o.group ? `
             <li class="dd-group" role="presentation">${o.group}</li>` : `
-            <li><button type="button" role="option" aria-selected="${o.value === state[name]}" data-action="dd-select" data-name="${name}" data-value="${esc(o.value)}">
+            <li data-label="${esc(o.label)}"><button type="button" role="option" id="dd-${name}-opt-${i}" aria-selected="${o.value === state[name]}" tabindex="-1" data-action="dd-select" data-name="${name}" data-value="${esc(o.value)}">
               ${o.value === state[name] ? ICON.checkSmall : ''}
               <span>${o.desc ? `<strong>${o.label}</strong> - ${o.desc}` : o.label}</span>
             </button></li>`).join('')}
+          ${searchable ? '<li class="dd-empty" role="presentation" hidden>Inga träffar</li>' : ''}
         </ul>` : ''}
+      ${errMsg(name)}
     </div>`;
 }
 let openDropdown = null;
+
+/* Filtrerar en sökbar rullgardin på inskrivna bokstäver (skiftlägesokänsligt, även å/ä/ö). */
+function filtreraDropdown(input) {
+  const q = input.value.trim().toLocaleLowerCase('sv');
+  const list = input.closest('.dd').querySelector('.dd-list');
+  let traffar = 0;
+  list.querySelectorAll('li[data-label]').forEach(li => {
+    const ok = li.dataset.label.toLocaleLowerCase('sv').includes(q);
+    li.hidden = !ok; if (ok) traffar++;
+  });
+  // Dölj grupprubriker som saknar träffar
+  list.querySelectorAll('.dd-group').forEach(g => {
+    let n = g.nextElementSibling, nagon = false;
+    while (n && !n.classList.contains('dd-group')) { if (n.dataset.label !== undefined && !n.hidden) nagon = true; n = n.nextElementSibling; }
+    g.hidden = !nagon;
+  });
+  list.querySelector('.dd-empty').hidden = traffar > 0;
+  const forsta = q ? list.querySelector('li[data-label]:not([hidden]) [role=option]') : null;
+  markeraAktivt(input, forsta);
+}
+
+function markeraAktivt(input, opt) {
+  input.closest('.dd').querySelectorAll('[role=option].is-active').forEach(o => o.classList.remove('is-active'));
+  if (opt) { opt.classList.add('is-active'); opt.scrollIntoView({ block: 'nearest' }); input.setAttribute('aria-activedescendant', opt.id); }
+  else input.removeAttribute('aria-activedescendant');
+}
 
 
 function formatMB(bytes) {
@@ -774,25 +813,17 @@ function uppgifterScreen(cfg) {
   
             ${!state.hamtad && state.manuell ? `
               <div class="manual">
-                ${textField('samordningsnr', 'Samordningsnummer eller personnummer (valfritt)', { placeholder: 'ÅÅÅÅMMXXNNNN', inputmode: 'numeric' })}
+                ${textField('samordningsnr', 'Samordningsnummer eller personnummer', { placeholder: 'ÅÅÅÅMMXXNNNN', inputmode: 'numeric' },
+                    { hint: 'Ange personnummer eller samordningsnummer.' })}
                 ${textField('fornamn', 'Förnamn', { autocomplete: 'given-name' })}
                 ${textField('efternamn', 'Efternamn', { autocomplete: 'family-name' })}
-                ${cfg.fragaBoende ? `
-                <fieldset class="options options-tight">
-                  <legend class="field-legend">Bor du i Sverige?</legend>
-                  ${radio('borISverige', 'ja', 'Ja')}
-                  ${radio('borISverige', 'nej', 'Nej')}
-                </fieldset>` : ''}
+                ${cfg.fragaBoende ? radioGrupp('borISverige', 'Bor du i Sverige?', [['ja', 'Ja'], ['nej', 'Nej']]) : ''}
                 ${adress.join('')}
               </div>` : ''}
             ${cfg.extra ? cfg.extra() : ''}
           </form>
   
-          ${cfg.buttons ? cfg.buttons() : `
-          <div class="actions actions-split">
-            <button class="btn-back" type="button" data-action="back">${ICON.chevronLeft} Tillbaka</button>
-            <button class="btn-primary" type="submit" form="form">Nästa steg</button>
-          </div>`}
+          ${cfg.buttons ? cfg.buttons() : stegKnappar()}
         </div>`;
       },
       mount: (root) => {
@@ -844,12 +875,15 @@ function stepper(steps, active) {
     </ol>`;
 }
 
-function textField(name, label, attrs = {}) {
+function textField(name, label, attrs = {}, { hint } = {}) {
   const extra = Object.entries(attrs).map(([k, v]) => `${k}="${esc(v)}"`).join(' ');
+  const fel = !!currentErrors()[name];
+  const beskrivs = [hint && `hint-${name}`, fel && `err-${name}`].filter(Boolean).join(' ');
   return `
     <div class="field${errClass(name)}">
       <label for="f-${name}">${label}</label>
-      <div class="input-wrap"><input id="f-${name}" name="${name}" ${extra} value="${esc(state[name])}" ${errAttrs(name)}></div>
+      ${hint ? `<p class="field-hint" id="hint-${name}">${hint}</p>` : ''}
+      <div class="input-wrap"><input id="f-${name}" name="${name}" ${extra} value="${esc(state[name])}" ${fel ? 'aria-invalid="true"' : ''} ${beskrivs ? `aria-describedby="${beskrivs}"` : ''}></div>
       ${errMsg(name)}
     </div>`;
 }
@@ -866,12 +900,18 @@ function checkbox(name, labelHtml) {
     </div>`;
 }
 
-function radio(name, value, label) {
+/* Ja/Nej-fråga som radioknappar. Första knappen får id f-<namn> så att fokus kan flyttas dit vid fel. */
+function radioGrupp(name, legend, val, { reveal } = {}) {
   return `
-    <label class="option">
-      <input type="radio" name="${name}" value="${value}" ${state[name] === value ? 'checked' : ''}>
-      <span class="radio"></span><span>${label}</span>
-    </label>`;
+    <fieldset class="options options-tight${errClass(name)}" ${errDescribed(name)} ${revealAttr(reveal)}>
+      <legend class="field-legend">${legend}</legend>
+      ${val.map(([value, label], i) => `
+        <label class="option">
+          <input type="radio" name="${name}" value="${value}" ${i === 0 ? `id="f-${name}"` : ''} ${state[name] === value ? 'checked' : ''}>
+          <span class="radio"></span><span>${label}</span>
+        </label>`).join('')}
+      ${errMsg(name)}
+    </fieldset>`;
 }
 
 /* Platshållare för steg som ännu inte har skisser. */
@@ -914,7 +954,13 @@ function collect(form) {
 function go(id) { location.hash = id; }
 function current() { return location.hash.slice(1) || 'valj-spar'; }
 
+let renderar = false;
 function render() {
+  renderar = true;
+  try { renderInnehall(); } finally { renderar = false; }
+}
+
+function renderInnehall() {
   const id = current();
   const root = document.getElementById('app');
   const screen = SCREENS[id];
@@ -929,6 +975,17 @@ function render() {
   }
   document.body.dataset.layout = screen?.layout ?? (PENDING[id] ? 'narrow' : 'wide');
   renderProtoTools(screen);
+  animeraNya(root, id);
+}
+
+/* Mjuk övergång: element med data-reveal som inte fanns vid förra renderingen av samma skärm tonas in. */
+let synligaReveal = null;
+function animeraNya(root, id) {
+  const els = [...root.querySelectorAll('[data-reveal]')];
+  if (synligaReveal?.id === id) {
+    els.filter(el => !synligaReveal.keys.has(el.dataset.reveal)).forEach(el => el.classList.add('reveal-in'));
+  }
+  synligaReveal = { id, keys: new Set(els.map(el => el.dataset.reveal)) };
 }
 
 /* Nästa skärm efter ett steg. Kom man dit via "Ändra" i granskningen går man direkt tillbaka dit
@@ -960,7 +1017,7 @@ document.addEventListener('click', (e) => {
   const action = el?.dataset.action;
   if (action === 'dd-toggle') {
     openDropdown = openDropdown === el.dataset.name ? null : el.dataset.name;
-    rerender(`[data-dd="${el.dataset.name}"] ${openDropdown ? '[role=option][aria-selected=true], [role=option]' : '.dd-toggle'}`);
+    rerender(`[data-dd="${el.dataset.name}"] ${openDropdown ? '.dd-search, [role=option][aria-selected=true], [role=option]' : '.dd-toggle'}`);
     return;
   }
   if (action === 'dd-select') {
@@ -969,6 +1026,7 @@ document.addEventListener('click', (e) => {
     if (screen?.onSelect) screen.onSelect(name, value || undefined); else state[name] = value || undefined;
     if (!value) delete state[name];
     openDropdown = null; saveState();
+    pruneErrors(current());
     rerender(`[data-dd="${name}"] .dd-toggle`);
     return;
   }
@@ -991,15 +1049,15 @@ const FIELD_IDS = { spar: 'f-spar', email: 'email', pnr: 'pnr' };
 const fieldId = (name) => FIELD_IDS[name] ?? `f-${name}`;
 const currentErrors = () => errorState[current()]?.errors ?? {};
 
-function errClass(name) { return currentErrors()[name] ? ' has-error' : ''; }
-function errMsg(name) {
-  const m = currentErrors()[name];
-  return m ? `<p class="error-msg" id="err-${name}">${ICON.warning}<span><span class="visually-hidden">Fel: </span>${m}</span></p>` : '';
+function errClass(name, errors = currentErrors()) { return errors[name] ? ' has-error' : ''; }
+function errMsgHtml(name, m) {
+  return `<p class="error-msg" id="err-${name}">${ICON.warning}<span><span class="visually-hidden">Fel: </span>${m}</span></p>`;
 }
-function errAttrs(name) { return currentErrors()[name] ? `aria-invalid="true" aria-describedby="err-${name}"` : ''; }
+function errMsg(name, errors = currentErrors()) { return errors[name] ? errMsgHtml(name, errors[name]) : ''; }
+function errAttrs(name, errors = currentErrors()) { return errors[name] ? `aria-invalid="true" aria-describedby="err-${name}"` : ''; }
 function errDescribed(name) { return currentErrors()[name] ? `aria-describedby="err-${name}"` : ''; }
 
-/* Kör validering (vid "Nästa steg" eller "Hämta"). Visar fel och flyttar fokus. Returnerar true om allt är OK. */
+/* Kör validering (vid "Spara och fortsätt" eller "Hämta"). Visar fel och flyttar fokus. Returnerar true om allt är OK. */
 function validera(screenId, validator = SCREENS[screenId].validate) {
   const errors = validator(state);
   if (!Object.keys(errors).length) { delete errorState[screenId]; return true; }
@@ -1012,16 +1070,17 @@ function validera(screenId, validator = SCREENS[screenId].validate) {
   return false;
 }
 
-/* Tar bort fel som har rättats (lägger aldrig till nya). Returnerar true om något ändrats. */
-function pruneErrors(screenId) {
+/* Tar bort fel som har rättats (lägger aldrig till nya). Fältet som just ändras (edited) tappar sitt fel
+ * även om det fortfarande är fel – formatet kontrolleras igen när fältet lämnas, aldrig medan man skriver.
+ * Returnerar true om något ändrats. */
+function pruneErrors(screenId, edited) {
   const es = errorState[screenId];
   const validator = es?.validator ?? SCREENS[screenId]?.validate;
   if (!es || !validator) return false;
   const now = validator(state);
   let changed = false;
   for (const k of Object.keys(es.errors)) {
-    if (!now[k]) { delete es.errors[k]; changed = true; }
-    else if (now[k] !== es.errors[k]) { es.errors[k] = now[k]; changed = true; }
+    if (!now[k] || (k === edited && now[k] !== es.errors[k])) { delete es.errors[k]; changed = true; }
   }
   if (!Object.keys(es.errors).length) delete errorState[screenId];
   return changed;
@@ -1029,8 +1088,10 @@ function pruneErrors(screenId) {
 
 // Medan användaren rättar: ta bort fel som inte längre gäller, behåll fokus och markörposition
 document.addEventListener('input', (e) => {
+  if (e.target.classList.contains('dd-search')) { filtreraDropdown(e.target); return; }
+  if (e.target.closest('dialog')) return; // kontaktmodalen hanterar sina egna fel
   const id = current();
-  if (!errorState[id] || !pruneErrors(id)) return;
+  if (!errorState[id] || !pruneErrors(id, e.target.name)) return;
   const el = e.target;
   const pos = typeof el.selectionStart === 'number' ? [el.selectionStart, el.selectionEnd] : null;
   const y = window.scrollY;
@@ -1039,6 +1100,97 @@ document.addEventListener('input', (e) => {
   again?.focus();
   if (pos && again?.setSelectionRange) try { again.setSelectionRange(...pos); } catch {}
 });
+
+/* ================================================================
+ * KONTAKTMODAL – HYPOTES (ska stämmas av med utvecklaren)
+ * "Ändra" på kontaktuppgifterna i granskningen öppnar en dialog i stället för att skicka
+ * användaren till steg 0. Spara uppdaterar granskningen direkt, Avbryt/Esc slänger ändringarna.
+ * Ta bort: sätt KONTAKT_I_MODAL = false – då går "Ändra" till steg 0 som tidigare
+ * (och hela blocket + .modal-stilarna i styles.css kan raderas).
+ * ================================================================ */
+const KONTAKT_I_MODAL = true;
+let kontaktFel = {};
+
+function kontaktModalHtml(d) {
+  const f = kontaktFel;
+  return `
+    <form class="modal-form" id="kontakt-form" novalidate>
+      <h2 id="kontakt-modal-titel">Ändra kontaktuppgifter</h2>
+      <div class="field${errClass('email', f)}">
+        <label for="m-email">E-postadress</label>
+        <div class="input-wrap">
+          ${ICON.mail}
+          <input id="m-email" name="email" type="email" autocomplete="email" value="${esc(d.email)}" ${errAttrs('email', f)}>
+        </div>
+        ${errMsg('email', f)}
+      </div>
+      <div class="field${errClass('telefon', f)}${errClass('landskod', f)}">
+        <label class="label" for="m-telefon">Mobilnummer</label>
+        <div class="phone">
+          <div class="input-wrap">
+            <input id="m-landskod" name="landskod" type="tel" inputmode="tel" autocomplete="tel-country-code" aria-label="Landskod" value="${esc(d.landskod)}" ${errAttrs('landskod', f)}>
+          </div>
+          <div class="input-wrap">
+            <input id="m-telefon" name="telefon" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="7XXXXXXXXX" value="${esc(d.telefon)}" ${errAttrs('telefon', f)}>
+          </div>
+        </div>
+        ${errMsg('landskod', f)}
+        ${errMsg('telefon', f)}
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" data-modal="avbryt">Avbryt</button>
+        <button type="submit" class="btn-primary">Spara</button>
+      </div>
+    </form>`;
+}
+
+const kontaktData = (dlg) => Object.fromEntries(['email', 'landskod', 'telefon'].map(k => [k, dlg.querySelector(`[name=${k}]`).value]));
+
+function oppnaKontaktModal() {
+  kontaktFel = {};
+  const dlg = document.createElement('dialog');
+  dlg.className = 'modal';
+  dlg.setAttribute('aria-labelledby', 'kontakt-modal-titel');
+  dlg.innerHTML = kontaktModalHtml({ email: state.email ?? '', landskod: state.landskod ?? '+46', telefon: state.telefon ?? '' });
+  document.body.appendChild(dlg);
+
+  dlg.addEventListener('close', () => {
+    dlg.remove();
+    document.querySelector('[data-action=andra][data-target=valj-spar]')?.focus();
+  });
+  dlg.addEventListener('click', (e) => { if (e.target.closest('[data-modal=avbryt]')) dlg.close(); });
+  dlg.addEventListener('input', (e) => {
+    // Fältet man skriver i tappar sitt fel tills det lämnas igen
+    if (!kontaktFel[e.target.name]) return;
+    delete kontaktFel[e.target.name];
+    const wrap = e.target.closest('.field');
+    wrap.querySelector(`#err-${e.target.name}`)?.remove();
+    e.target.removeAttribute('aria-invalid'); e.target.removeAttribute('aria-describedby');
+    if (!wrap.querySelector('.error-msg')) wrap.classList.remove('has-error');
+  });
+  dlg.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const d = kontaktData(dlg);
+    kontaktFel = valideraKontaktfalt(d);
+    if (Object.keys(kontaktFel).length) {
+      dlg.innerHTML = kontaktModalHtml(d);
+      dlg.querySelector(`#m-${Object.keys(kontaktFel)[0]}`)?.focus();
+      return;
+    }
+    Object.assign(state, d); saveState();
+    dlg.close();
+    rerender();
+  });
+  dlg.showModal();
+}
+
+/* Formatkontroll när ett fält i modalen lämnas. */
+function kontaktBlur(el) {
+  const fel = formatFel(el.name, kontaktData(el.closest('dialog')));
+  if (!fel) return;
+  kontaktFel[el.name] = fel;
+  visaFaltfel(el, el.name, fel);
+}
 
 /* ---------- Testverktyg nere till vänster (endast i prototypen) ---------- */
 const TILL_FORSTA_STEGET = { label: 'Till första steget', title: 'Gå till Välj spår (ifyllda uppgifter sparas)', run: () => go('valj-spar') };
@@ -1098,11 +1250,63 @@ function resetStep() {
 document.getElementById('close').addEventListener('click', resetAll);
 document.getElementById('reset-step').addEventListener('click', resetStep);
 
+/* Tangentbord i öppen rullgardin: pil upp/ned flyttar, Enter väljer, Esc stänger.
+ * Sökbar rullgardin: fokus stannar i sökfältet och aktivt alternativ markeras (aria-activedescendant). */
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && openDropdown) {
-    const name = openDropdown; openDropdown = null; rerender(`[data-dd="${name}"] .dd-toggle`);
+  if (!openDropdown) return;
+  const name = openDropdown;
+  if (e.key === 'Escape') { e.preventDefault(); openDropdown = null; rerender(`[data-dd="${name}"] .dd-toggle`); return; }
+  const dd = document.querySelector(`[data-dd="${name}"]`);
+  if (!dd || !['ArrowDown', 'ArrowUp', 'Home', 'End', 'Enter'].includes(e.key)) return;
+  const opts = [...dd.querySelectorAll('.dd-list li[data-label]:not([hidden]) [role=option]')];
+  const search = dd.querySelector('.dd-search');
+  const nu = search ? opts.findIndex(o => o.classList.contains('is-active')) : opts.indexOf(document.activeElement);
+  if (e.key === 'Enter') {
+    if (!search) return; // knappen väljs av webbläsaren
+    e.preventDefault();
+    (opts[nu] ?? (opts.length === 1 ? opts[0] : null))?.click();
+    return;
   }
+  e.preventDefault();
+  const sist = opts.length - 1;
+  const nasta = e.key === 'Home' ? 0 : e.key === 'End' ? sist
+    : e.key === 'ArrowDown' ? Math.min(nu + 1, sist) : Math.max(nu - 1, 0);
+  if (search) markeraAktivt(search, opts[nasta]); else opts[nasta]?.focus();
 });
+
+/* ---------- Validering när användaren lämnar ett fält (on blur) ----------
+ * Värdet normaliseras först (personnummer, postnummer). Är fältet ifyllt men i fel format visas felet
+ * direkt under fältet utan att sidan ritas om (annars kan ett klick på en knapp gå förlorat). */
+document.addEventListener('focusout', (e) => {
+  const el = e.target;
+  if (el.tagName !== 'INPUT' || !el.name || ['radio', 'checkbox', 'file'].includes(el.type)) return;
+  if (renderar) return; // fält som försvinner vid omritning ska inte valideras
+  const dialog = el.closest('dialog');
+  const namn = el.name;
+  const normal = normaliseraVarde(namn, el.value);
+  if (normal !== el.value) el.value = normal;
+  if (dialog) { kontaktBlur(el); return; }
+  state[namn] = el.value; saveState();
+  const fel = formatFel(namn, state);
+  if (!fel) return;
+  const id = current();
+  errorState[id] ??= { errors: {}, validator: SCREENS[id]?.validate };
+  errorState[id].errors[namn] = fel;
+  visaFaltfel(el, namn, fel);
+});
+
+/* Lägger in felmeddelande under ett fält direkt i DOM:en (samma utseende som errMsg). */
+function visaFaltfel(input, name, msg) {
+  const wrap = input.closest('.field, .check-wrap, .consent-wrap');
+  if (!wrap) return;
+  wrap.querySelector(`#err-${name}`)?.remove();
+  wrap.classList.add('has-error');
+  input.setAttribute('aria-invalid', 'true');
+  const beskrivs = new Set((input.getAttribute('aria-describedby') || '').split(' ').filter(Boolean));
+  beskrivs.add(`err-${name}`);
+  input.setAttribute('aria-describedby', [...beskrivs].join(' '));
+  wrap.insertAdjacentHTML('beforeend', errMsgHtml(name, msg));
+}
 window.addEventListener('hashchange', () => { openDropdown = null; for (const k in errorState) delete errorState[k]; });
 
 // Växla mellan prototypversionerna och stanna på samma steg

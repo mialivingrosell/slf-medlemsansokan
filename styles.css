@@ -409,58 +409,43 @@ body[data-layout="narrow"] .header {
   .dd-list { max-height: 340px; }
 }
 
-/* ---------- Steg 4: Signera ---------- */
-.review-intro { text-align: center; font-style: italic; font-weight: 700; margin: -10px 0 40px; }
-.signera .summary { padding: 30px 30px 28px; margin-bottom: 20px; }
-.summary-head { position: relative; display: flex; justify-content: center; margin-bottom: 26px; }
-.summary h2 { font-size: 24px; letter-spacing: -0.01em; margin: 0; }
+/* ---------- Steg 4: Signera ----------
+ * Beslut 2026-10-12: tajt och vänsterställd även på dator (som mobilläget). */
+.review-intro { text-align: left; font-style: italic; font-weight: 700; margin: -14px 0 22px; }
+.page.narrow.signera .summary { padding: 24px 32px 26px; margin-bottom: 14px; }
+.summary-head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin-bottom: 12px; }
+.summary h2 { font-size: 22px; letter-spacing: -0.01em; margin: 0; }
 .link-edit {
-  position: absolute; right: 0; top: 50%; transform: translateY(-50%);
   background: none; border: 0; padding: 0; color: var(--blue); font-weight: 700; font-size: 15px;
 }
-.summary-list {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 12px 20px; margin: 0;
-}
-.summary-list dt { font-weight: 700; text-align: right; }
-.summary-list dd { margin: 0; line-height: 1.75; margin-top: -3px; }
-.summary-fee { text-align: center; }
-.summary-fee h2 { margin-bottom: 18px; }
-.fee-text { max-width: 500px; margin: 0 auto 24px; }
-.summary-fee-list { grid-template-columns: max-content max-content; justify-content: center; }
+.summary-list { margin: 0; }
+.summary-list dt { font-weight: 700; margin-top: 10px; }
+.summary-list dt:first-child { margin-top: 0; }
+.summary-list dd { margin: 2px 0 0; line-height: 1.5; }
+.summary-fee h2 { margin-bottom: 10px; }
+.fee-text { margin: 0 0 12px; }
 
-.disclosure-block { margin-top: 32px; padding-left: 16px; text-align: left; }
+.disclosure-block { margin-top: 18px; text-align: left; }
 .disclosure.strong { font-weight: 700; margin-top: 0; }
-.disclosure-content { padding: 6px 0 0 20px; }
-.disclosure-content p { margin: 0 0 18px; }
+.disclosure-content { padding: 8px 0 0 21px; }
+.disclosure-content p { margin: 0 0 14px; }
 .disclosure-content p:last-child { margin-bottom: 0; }
-.disclosure-content ul { margin: 0 0 18px; padding-left: 22px; }
+.disclosure-content ul { margin: 0 0 14px; padding-left: 22px; }
 .disclosure-content li { margin-bottom: 4px; }
 
 .btn-submit { display: inline-flex; align-items: center; justify-content: center; gap: 22px; min-width: 253px !important; }
 .btn-submit .bankid { width: 36px; height: 31px; }
-.no-bankid { border-top: 1px solid #c9c9c9; margin-top: 32px; padding-top: 14px; }
-.no-bankid .disclosure-block { padding-left: 0; margin-top: 18px; }
-.no-bankid .disclosure-content { padding-left: 18px; }
-.no-bankid .btn-small { margin-top: 4px; min-width: 211px; }
+.no-bankid { border-top: 1px solid #c9c9c9; margin-top: 28px; padding-top: 4px; }
+.no-bankid .disclosure-content { padding-left: 21px; }
 
 @media (max-width: 899px) {
-  .review-intro { margin: -6px 22px 24px; }
-  .page.narrow.signera .summary { padding: 22px 22px 26px; margin: 0 12px 16px; }
-  .summary-head { justify-content: space-between; margin-bottom: 18px; }
-  .summary h2 { font-size: 22px; }
-  .link-edit { position: static; transform: none; }
-  .summary-list { display: block; }
-  .summary-list dt { text-align: left; margin-top: 16px; }
-  .summary-list dt:first-child { margin-top: 0; }
-  .summary-list dd { margin-top: 6px; line-height: 1.6; }
-  .summary-fee { text-align: left; }
-  .summary-fee .summary-head, .summary-fee h2 { text-align: left; }
-  .fee-text { margin: 0 0 18px; }
-  .disclosure-block { padding-left: 0; margin-top: 24px; }
+  .review-intro { margin: -6px 22px 20px; }
+  .page.narrow.signera .summary { padding: 20px 20px 22px; margin: 0 12px 14px; }
+  .summary-list dd { margin-top: 4px; }
   .signera .actions-split { margin: 30px 12px 0; }
   .page.narrow.signera .btn-back { display: none; }
   .signera .btn-submit { width: 100%; }
-  .no-bankid { border-top: 0; margin: 20px 12px 0; padding-top: 0; }
+  .no-bankid { border-top: 0; margin: 16px 12px 0; padding-top: 0; }
 }
 
 /* ---------- Kvittens / Redan medlem (sajtens layout) ---------- */
@@ -511,18 +496,10 @@ body[data-layout="site"] > .header { display: none; }
 
 /* ---------- Studentspåret ---------- */
 .stepper.steps-3 { grid-template-columns: repeat(3, 160px); }
-.summary-plain { text-align: left; }
-.summary-plain .summary-head { justify-content: center; }
-.plain-list { list-style: none; margin: 0; padding: 0; text-align: center; }
-.plain-list li { margin-bottom: 14px; }
-.summary-plain .fee-text { text-align: center; }
-.consent-tight { margin: 0 auto; max-width: 540px; position: relative; }
+.consent-tight { margin: 0; position: relative; }
 
 @media (max-width: 899px) {
   .stepper.steps-3 { grid-template-columns: repeat(3, 1fr); padding: 0 6px; }
-  .summary-plain .summary-head { justify-content: space-between; }
-  .plain-list, .summary-plain .fee-text { text-align: left; }
-  .consent-tight { max-width: none; }
 }
 
 /* ---------- Föreningsspåret ---------- */
@@ -556,7 +533,7 @@ body[data-layout="site"] > .header { display: none; }
   display: flex; align-items: flex-start; gap: 8px;
   color: var(--error); font-weight: 400; margin: 10px 0 0 2px; line-height: 1.35;
 }
-.error-icon { width: 19px; height: 17px; flex: none; margin-top: 1px; }
+.error-icon { width: 18px; height: 18px; flex: none; margin-top: 1px; }
 
 /* Röd ram bara på det fält som är fel (landskod och telefon delar rad) */
 .input-wrap:has([aria-invalid="true"]), .has-error .select-wrap select, .has-error .dd-toggle { border-color: var(--error); }
@@ -601,4 +578,46 @@ body[data-layout="site"] > .header { display: none; }
   .start .intro h1 { font-size: 26px; margin: 0 0 24px; line-height: 1.12; }
   .start .card h2, .start .card .lead { display: none; }
   .page.narrow.start .btn-back { visibility: visible; }
+}
+
+/* ---------- Rullgardin: sökbar variant + tangentbord ---------- */
+.dd-combo { padding: 0 0 0 0; outline: 2px solid var(--blue); outline-offset: -1px; border-color: transparent; }
+.dd-search {
+  flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; background: transparent;
+  font: inherit; color: var(--text); padding: 0 0 0 18px;
+}
+.dd-search::placeholder { color: var(--muted); }
+.dd-chev-btn { background: none; border: 0; padding: 0 22px 0 12px; height: 100%; display: inline-flex; align-items: center; }
+.dd-list button.is-active { background: #ecebe8; }
+.dd-list li[hidden] { display: none; }
+.dd-empty { padding: 12px 18px; color: var(--muted); }
+
+/* ---------- Stegvis visning: ny fråga tonas in ---------- */
+@keyframes reveal-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+.reveal-in { animation: reveal-in .35s ease-out; }
+@media (prefers-reduced-motion: reduce) { .reveal-in { animation: none; } }
+
+/* ---------- Hjälptext under etikett ---------- */
+.field-hint { margin: -4px 0 10px 2px; color: #555; }
+
+/* ---------- Kontaktmodal (HYPOTES – tas bort tillsammans med KONTAKT_I_MODAL i app.js) ---------- */
+.modal {
+  border: 0; border-radius: 8px; padding: 32px 36px 30px;
+  width: min(560px, calc(100vw - 32px)); max-height: calc(100vh - 32px);
+  box-shadow: 0 20px 50px rgba(0,0,0,.25); color: var(--text);
+}
+.modal::backdrop { background: rgba(20, 20, 20, .45); }
+.modal h2 { font-size: 22px; margin: 0 0 22px; letter-spacing: -0.01em; }
+.modal .field { margin-bottom: 22px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 28px; }
+.modal .btn-primary { min-width: 130px; }
+.btn-secondary {
+  background: #fff; color: var(--blue); border: 0; border-radius: 2px; box-shadow: inset 0 0 0 1.5px var(--blue);
+  height: 50px; min-width: 130px; padding: 0 24px; font-weight: 700; font-size: 15px;
+}
+.btn-secondary:hover { background: #f2f6fc; }
+@media (max-width: 899px) {
+  .modal { padding: 24px 18px 22px; }
+  .modal-actions { flex-direction: column-reverse; }
+  .modal-actions button { width: 100%; }
 }
