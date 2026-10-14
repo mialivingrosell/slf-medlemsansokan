@@ -246,9 +246,9 @@ const SCREENS = {
       let body;
       if (saknarSvenskLeg(state)) {
         body = `
-          <h2 class="card-heading">Lokalavdelningar och yrkesföreningar</h2>
-          <p>Medlemmar i Läkarförbundet som har svensk läkarlegitimation blir också medlemmar i en lokalavdelning och en yrkesförening.</p>
-          <p>När du har fått din läkarlegitimation kommer du få information om att du kan kontakta oss för att lägga till lokalavdelning och yrkesförening. Dessa kommer säkra att du får expertstöd i allt från din lokala arbetsmiljö till din karriärspecifika utveckling. Det garanterar att du får rätt hjälp oavsett om frågan rör din specifika arbetsplats eller din yrkesroll.</p>`;
+          <h2 class="card-heading">Lokalföreningar och yrkesföreningar</h2>
+          <p>Medlemmar i Läkarförbundet som har svensk läkarlegitimation blir också medlemmar i en lokalförening och en yrkesförening.</p>
+          <p>När du har fått din läkarlegitimation kommer du få information om att du kan kontakta oss för att lägga till lokalförening och yrkesförening. Dessa kommer säkra att du får expertstöd i allt från din lokala arbetsmiljö till din karriärspecifika utveckling. Det garanterar att du får rätt hjälp oavsett om frågan rör din specifika arbetsplats eller din yrkesroll.</p>`;
       } else {
         // Stegvis visning: län → (kommun / sektion) → specialistfrågan → yrkesförening
         const lokal = lokalforening(state);
@@ -259,7 +259,7 @@ const SCREENS = {
           : state.specialist === 'ja' ? state.yrkesforening : null;
         body = `
           <h2 class="card-heading">Hitta dina föreningar</h2>
-          <p>Läkarförbundet har 25 lokalavdelningar spridda över hela landet. Som läkare och medlem i Läkarförbundet, tillhör du den lokalavdelning som är verksam där du arbetar.</p>
+          <p>Läkarförbundet har 25 lokalföreningar spridda över hela landet. Som läkare och medlem i Läkarförbundet tillhör du den lokalförening som är verksam där du arbetar.</p>
           <p>I ditt medlemskap ingår också ett medlemskap i en av våra åtta yrkesföreningar. En yrkesförening driver frågor som är knutet till din ställning och plats i yrket.</p>
 
           ${dropdown('lan', 'I vilket län har du din primära arbetsplats?', 'Välj län',
@@ -268,9 +268,9 @@ const SCREENS = {
           ${state.lan === 'skane' ? dropdown('kommun', 'I vilken kommun jobbar du?', 'Välj kommun',
               SKANE_KOMMUNER.map(([namn]) => ({ value: namn, label: namn })), { reveal: 'kommun' }) : ''}
 
-          ${lokal ? infoBox(`Din lokalavdelning är <strong>${lokal}.</strong>`, 'lokal') : ''}
+          ${lokal ? infoBox(`Din lokalförening är <strong>${lokal}.</strong>`, 'lokal') : ''}
 
-          ${sektioner ? dropdown('sektion', 'Välj sektion för din lokalavdelning baserat på din arbetsplats', 'Välj sektion', sektioner, { reveal: 'sektion' }) : ''}
+          ${sektioner ? dropdown('sektion', 'Välj sektion för din lokalförening baserat på din arbetsplats', 'Välj sektion', sektioner, { reveal: 'sektion' }) : ''}
 
           ${visaSpecialist ? `
             ${radioGrupp('specialist', 'Är du färdig specialistläkare?', [['ja', 'Ja'], ['nej', 'Nej']], { reveal: 'specialist' })}
@@ -321,10 +321,10 @@ const SCREENS = {
 
       const lokalavd = lokalavdelning(state);
       const foreningar = [
-        ['Lokalavdelning', lokalforening(state)],
-        ['Sektion för lokalavdelning', sektionerFor(state.lan)?.find(x => x.value === state.sektion)?.label],
+        ['Lokalförening', lokalforening(state)],
+        ['Sektion för lokalförening', sektionerFor(state.lan)?.find(x => x.value === state.sektion)?.label],
         ['Yrkesförening', state.specialist === 'nej' ? 'Sveriges yngre läkares förening SYLF' : state.yrkesforening],
-        ['Lokalavdelning för yrkesförening', lokalavd],
+        ['Lokalavdelning', lokalavd],
       ].filter(([, v]) => v).map(([k, v]) => [k, esc(v)]);
 
       return `
@@ -340,19 +340,19 @@ const SCREENS = {
           ['Land för läkarexamen', land || '–'],
         ])}
         ${saknarSvenskLeg(state) ? '' : summaryCard('Dina föreningar', 'lakare-yrke', foreningar.length ? foreningar : [['Föreningar', '–']],
-          disclosure('merInfoForeningar', 'Mer information om lokalavdelningar och yrkesföreningar', `
-            <p>Förutom att du blir medlem i vårt fackförbund Sveriges Läkarförening blir du också medlem i en lokalavdelning och en yrkesförening. Här måste vi också förtydliga att man måste vara med i dessa föreningar. Det kostar inget extra för medlemskap i sektioner för lokalavdelningar, men några sektioner för yrkesföreningar tar en avgift.</p>`))}
+          disclosure('merInfoForeningar', 'Mer information om lokalföreningar och yrkesföreningar', `
+            <p>Förutom att du blir medlem i vårt fackförbund Sveriges Läkarförening blir du också medlem i en lokalförening och en yrkesförening. Här måste vi också förtydliga att man måste vara med i dessa föreningar. Det kostar inget extra för medlemskap i sektioner för lokalföreningar, men några sektioner för yrkesföreningar tar en avgift.</p>`))}
 
         <section class="card summary summary-fee">
           <h2>Månadsavgift</h2>
           <p class="fee-text">${saknarSvenskLeg(state)
             ? 'Om du är utbildad till läkare utomlands, men ännu inte fått din svenska läkarlegitimation betalar du en lägre medlemsavgift.'
-            : 'Din månadsavgift baseras på typ av medlemskap samt vilken lokalavdelning och yrkesförening du blir medlem i.'}</p>
+            : 'Din månadsavgift baseras på typ av medlemskap samt vilken lokalförening och yrkesförening du blir medlem i.'}</p>
           <dl class="summary-list summary-fee-list"><dt>Avgift</dt><dd>${manadsavgift(state)} kr</dd></dl>
           ${disclosure('visaIngar', 'Vad ingår i medlemskapet?', `
-            <p>Din månadsavgift baseras på typ av medlemskap samt vilken lokalavdelning och yrkesförening du blir medlem i. Inkluderat i medlemskapet är bland annat:</p>
+            <p>Din månadsavgift baseras på typ av medlemskap samt vilken lokalförening och yrkesförening du blir medlem i. Inkluderat i medlemskapet är bland annat:</p>
             <ul>
-              <li>Medlemskap i Läkarförbundet, lokalavdelning och yrkesförening inkl. ev sektioner</li>
+              <li>Medlemskap i Läkarförbundet, lokalförening och yrkesförening inkl. ev sektioner</li>
               <li>Inkomstförsäkring via Folksam</li>
               <li>Läkartidningen 10 ggr/år</li>
               <li>Möjlighet att hyra förbundets egna fritidsboenden</li>
@@ -393,6 +393,7 @@ const SCREENS = {
             ${dropdown('studieland', 'Land', 'Välj land', COUNTRIES.filter(c => c[0] !== 'se').map(([value, label]) => ({ value, label })))}` : ''}
           ${avd ? `
             ${infoBox(`Din yrkesförening är <strong>${STUDENT_YRKESFORENING}.</strong> Din lokalavdelning är <strong>${avd}.</strong>`)}
+            ${disclosure('varforYrkesforeningUtb', VARFOR_YRKESFORENING.label, VARFOR_YRKESFORENING.text)}
             <div class="field${errClass('examensdatumStudent')}">
               <label for="f-examensdatumStudent">Förväntat examensdatum</label>
               <div class="input-wrap">
@@ -420,6 +421,7 @@ const SCREENS = {
     },
     actions: {
       kalender: () => { const dp = document.getElementById('datepicker'); try { dp.showPicker(); } catch { dp.click(); } },
+      toggle: (btn) => { state[btn.dataset.key] = !state[btn.dataset.key]; saveState(); rerender(); },
     },
     onSelect: (name, value) => {
       state[name] = value;
@@ -427,7 +429,7 @@ const SCREENS = {
     },
     back: 'student-uppgifter',
     validate: valideraStudentUtbildning,
-    fields: ['universitet', 'universitetUtl', 'studieland', 'examensdatumStudent'],
+    fields: ['universitet', 'universitetUtl', 'studieland', 'examensdatumStudent', 'varforYrkesforeningUtb'],
   },
 
   'student-signera': {
@@ -454,9 +456,7 @@ const SCREENS = {
           ['Yrkesförening', STUDENT_YRKESFORENING],
           ['Lokalavdelning', esc(avd) || '–'],
         ],
-          // TODO: slutlig text kommer från SLF
-          disclosure('varforYrkesforening', 'Varför blir jag medlem i en yrkesförening?', `
-            <p>Som medlem i Sveriges Läkarförbund blir du också medlem i en yrkesförening och en lokalavdelning. Yrkesföreningen samlar läkare i samma yrkesskede, och lokalavdelningen finns nära dig.</p>`))}
+          disclosure('varforYrkesforening', VARFOR_YRKESFORENING.label, VARFOR_YRKESFORENING.text))}
 
         <section class="card summary summary-plain">
           <div class="summary-head"><h2>Årsavgift</h2></div>
@@ -617,6 +617,13 @@ function uppgiftsRader() {
     ['Adress', adress.filter(Boolean).map(esc).join('<br>') || '–'],
   ];
 }
+
+/* Utfällbar förklaring för studenter – visas i steg Utbildning och i granskningen (samma källa).
+ * TODO: slutlig text kommer från SLF. */
+const VARFOR_YRKESFORENING = {
+  label: 'Varför blir jag medlem i en yrkesförening?',
+  text: '<p>Som medlem i Sveriges Läkarförbund blir du också medlem i en yrkesförening och en lokalavdelning. Yrkesföreningen samlar läkare i samma yrkesskede, och lokalavdelningen finns nära dig.</p>',
+};
 
 function summaryCard(title, editTarget, rows, extra = '') {
   return `

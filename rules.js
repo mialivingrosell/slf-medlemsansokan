@@ -92,12 +92,12 @@ function nextScreen(current, data) {
  * Spår läkare, steg 3 – Yrke
  * ----------------------------------------------------------------
  *  • Saknar svensk legitimation (land utanför EU/EES + "Nej" i steg 2)
- *      → hela steget ersätts av infotexten "Lokalavdelningar och yrkesföreningar".
+ *      → hela steget ersätts av infotexten "Lokalföreningar och yrkesföreningar".
  *  Frågorna visas stegvis (beslut 2026-10-12): först bara länet.
- *  • Län (inget förval). Lokalavdelning (länets läkarförening):
- *      – Skåne län      → "I vilken kommun jobbar du?" → lokalavdelning beror på kommun
- *      – Stockholm, VGR → lokalavdelning visas + "Välj sektion för din lokalavdelning"
- *      – Övriga län     → lokalavdelning visas direkt
+ *  • Län (inget förval). Lokalförening (länets läkarförening):
+ *      – Skåne län      → "I vilken kommun jobbar du?" → lokalförening beror på kommun
+ *      – Stockholm, VGR → lokalförening visas + "Välj sektion för din lokalförening"
+ *      – Övriga län     → lokalförening visas direkt
  *  • "Är du färdig specialistläkare?" visas först när länet (+ ev. kommun/sektion) är besvarat.
  *      Nej → "Din yrkesförening är Sveriges yngre läkares förening SYLF."
  *      Ja  → "Välj yrkesförening" → efter val, i SAMMA blå ruta:
@@ -106,7 +106,7 @@ function nextScreen(current, data) {
  *  • Byte av län nollställer kommun och sektion.
  * ================================================================ */
 
-// EXEMPELDATA – lokalavdelningarnas (läkarföreningarnas) namn ska stämmas av med SLF
+// EXEMPELDATA – lokalföreningarnas namn ska stämmas av med SLF
 const LAN = [
   ['blekinge', 'Blekinge län', 'Blekinge läkarförening'],
   ['dalarna', 'Dalarnas län', 'Dalarnas läkarförening'],
@@ -131,7 +131,7 @@ const LAN = [
   ['ostergotland', 'Östergötlands län', 'Östergötlands läkarförening'],
 ];
 
-// EXEMPELDATA – Skånes kommuner → [lokalavdelning, Sjukhusläkarnas lokalavdelning]
+// EXEMPELDATA – Skånes kommuner → [lokalförening, Sjukhusläkarnas lokalavdelning]
 const SKANE_OMRADEN = {
   mellersta: ['Mellersta Skånes läkarförening', 'Sjukhusläkarna Lund'],
   malmo:     ['Malmö läkarförening', 'Sjukhusläkarna Malmö'],
@@ -193,7 +193,7 @@ function sektionerFor(lan) {
   return lan === 'stockholm' ? SEKTIONER_STOCKHOLM : lan === 'vgr' ? SEKTIONER_VGR : null;
 }
 
-/* Lokalavdelning (länets läkarförening) utifrån län (+ kommun i Skåne). null = inte avgjord ännu. */
+/* Lokalförening (länets läkarförening) utifrån län (+ kommun i Skåne). null = inte avgjord ännu. */
 function lokalforening(data) {
   if (!data.lan) return null;
   if (data.lan === 'skane') {
@@ -495,7 +495,7 @@ function valideraYrke(data) {
   if (saknarSvenskLeg(data)) return fel;
   if (!data.lan) fel.lan = 'Välj i vilket län du har din primära arbetsplats.';
   else if (data.lan === 'skane' && !data.kommun) fel.kommun = 'Välj i vilken kommun du jobbar.';
-  else if (sektionerFor(data.lan) && !data.sektion) fel.sektion = 'Välj sektion för din lokalavdelning.';
+  else if (sektionerFor(data.lan) && !data.sektion) fel.sektion = 'Välj sektion för din lokalförening.';
   else if (!data.specialist) fel.specialist = 'Svara på om du är färdig specialistläkare.';
   else if (data.specialist === 'ja' && !data.yrkesforening) fel.yrkesforening = 'Välj yrkesförening.';
   return fel;
