@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Bli medlem – Sveriges Läkarförbund (prototyp v2)</title>
+  <title>Bli medlem – Sveriges Läkarförbund (prototyp)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
@@ -20,10 +20,10 @@
   <main id="app"></main>
 
   <div class="proto-tools" aria-label="Testverktyg för prototypen">
+    <button type="button" class="proto-reset" id="reset-all" title="Rensar allt som fyllts i och går till första steget (endast i prototypen)">Nollställ allt</button>
     <button type="button" class="proto-reset" id="reset-step" title="Rensar det som fyllts i på den här sidan (endast i prototypen)">Nollställ steg</button>
     <span id="proto-extra"></span>
   </div>
-  <a class="proto-version" id="version-link" href="version-1/index.html" title="Växla till version 1 (samma steg)">Visa version 1</a>
 
   <script src="rules.js"></script>
   <script src="app.js"></script>

@@ -550,14 +550,6 @@ body[data-layout="site"] > .header { display: none; }
 
 .check-wrap .error-msg { margin-top: 10px; }
 
-/* Växla prototypversion – nere till höger */
-.proto-version {
-  position: fixed; right: 14px; bottom: 12px; z-index: 10;
-  background: rgba(247, 246, 244, .92); border-radius: 3px; padding: 4px 6px;
-  font-size: 12px; color: #9a9a9a; text-decoration: underline; text-underline-offset: 2px; opacity: .8;
-}
-.proto-version:hover, .proto-version:focus-visible { color: var(--blue); opacity: 1; }
-
 /* ---------- Version 2: enspaltig startsida (linjerar med formulärsidorna) ---------- */
 .mobile-only { display: none; }
 .page.narrow.start { display: flex; flex-direction: column; padding-top: 52px; }

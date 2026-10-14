@@ -1256,6 +1256,7 @@ function resetStep() {
 // Krysset: i skarp version stängs ansökan – i prototypen rensas allt och man hamnar på första steget.
 document.getElementById('close').addEventListener('click', resetAll);
 document.getElementById('reset-step').addEventListener('click', resetStep);
+document.getElementById('reset-all').addEventListener('click', resetAll);
 
 /* Tangentbord i öppen rullgardin: pil upp/ned flyttar, Enter väljer, Esc stänger.
  * Sökbar rullgardin: fokus stannar i sökfältet och aktivt alternativ markeras (aria-activedescendant). */
@@ -1316,11 +1317,6 @@ function visaFaltfel(input, name, msg) {
 }
 window.addEventListener('hashchange', () => { openDropdown = null; for (const k in errorState) delete errorState[k]; });
 
-// Växla mellan prototypversionerna och stanna på samma steg
-document.getElementById('version-link')?.addEventListener('click', (e) => {
-  e.preventDefault();
-  location.href = e.currentTarget.getAttribute('href') + location.hash;
-});
 
 renderLogo();
 render();
