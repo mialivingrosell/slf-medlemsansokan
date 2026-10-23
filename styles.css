@@ -91,6 +91,7 @@ button { font: inherit; cursor: pointer; }
 }
 .card .lead { margin: 0 0 22px 0; }
 .q-label { display: none; font-weight: 700; font-size: 16px; margin: 0 0 14px; }
+.q-label.q-label-always { display: block; } /* följdfrågan i steg 0 behöver sin rubrik även på desktop */
 
 /* Radio-kort */
 .options { display: grid; gap: 8px; margin: 0 0 40px 0; border: 0; padding: 0; }

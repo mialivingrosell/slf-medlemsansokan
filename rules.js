@@ -8,12 +8,19 @@
  */
 
 const RULES = {
-  // Steg 0 – Välj spår
+  // Steg 0 – Välj spår (texter 2026-10-23)
+  //  • Två val syns direkt: Sveriges läkarförbund / specialitets- eller intresseförening.
+  //  • Sveriges läkarförbund → följdfråga "Vilket stämmer på dig?": läkare / student.
+  //  • Specialitets- eller intresseförening → kursiv notering, direkt till föreningsansökan.
+  valjMedlemskap: {
+    forbund:  { label: 'Jag vill bli medlem i Sveriges läkarförbund' },
+    forening: { label: 'Jag vill bli medlem i en specialitets- eller intresseförening',
+                note: 'Notera att du inte blir medlem i Sveriges läkarförbund när du blir medlem i en specialitets- eller intresseförening.' },
+  },
   valjSpar: {
-    lakare:   { label: 'Jag är läkare med läkarexamen',                            next: 'lakare-uppgifter' },
-    student:  { label: 'Jag studerar till läkare',                                 next: 'student-uppgifter' },
-    forening: { label: 'Jag vill bli medlem i en specialitets- eller intresseförening', next: 'forening-ansokan',
-                note: 'Notera att du inte blir medlem i Sveriges Läkarförbund när du blir medlem i en specialitets- eller intresseförening.' },
+    lakare:   { label: 'Jag är läkare med läkarexamen', next: 'lakare-uppgifter' },
+    student:  { label: 'Jag studerar till läkare',      next: 'student-uppgifter' },
+    forening: { next: 'forening-ansokan' }, // sätts när "specialitets- eller intresseförening" väljs
   },
 
   // Spår läkare, steg 1 – Uppgifter
@@ -32,7 +39,7 @@ const RULES = {
   //  • Land för läkarexamen – Sverige förvalt.
   //  • Land utanför EU/EES → "Har du svenskt läkarlegitimation?" (inget förval)
   //      Ja  → inget mer
-  //      Nej → "Bifoga dokumentation för legitimationsvillkor" (en eller flera PDF, max 4,5 MB totalt)
+  //      Nej → "Bifoga dokumentation" (en eller flera PDF, max 4,5 MB totalt – frivilligt, inget felmeddelande)
   //  • Land inom EU/EES → inga följdfrågor.
   //  • "Spara och fortsätt" → Yrke.
 };
@@ -253,14 +260,14 @@ function arRedanMedlem(data) {
  *  Steg: Uppgifter → Utbildning → Signera → kvittens / redan medlem
  *  • Uppgifter: som läkarspåret men utan "Bor du i Sverige?" (alltid svensk adress).
  *  • Utbildning: "Välj ditt universitet" (inget förval)
- *      Svenskt lärosäte    → "Din yrkesförening är Sveriges Läkarförbund Student. Din lokalavdelning är SLF Student <ort>." + Förväntat examensdatum
+ *      Svenskt lärosäte    → "Din yrkesförening är Sveriges läkarförbund student. Din lokalavdelning är SLF Student <ort>." + Förväntat examensdatum
  *      Studerar utomlands  → Universitet (utomlands) + Land
  *                            → när land valts: "SLF Student Utland" + Förväntat examensdatum
  *  • Signera: Dina uppgifter, kontaktuppgifter, utbildning (Ändra), föreningar (ingen Ändra),
  *             årsavgift, valfri prenumeration på Läkartidningen, BankID / "Jag har inte BankID".
  * ================================================================ */
 const UTLAND = 'utland';
-const STUDENT_YRKESFORENING = 'Sveriges Läkarförbund Student';
+const STUDENT_YRKESFORENING = 'Sveriges läkarförbund student';
 
 // EXEMPELDATA – lärosäten med läkarprogram → lokalavdelning
 const UNIVERSITET = [
@@ -428,7 +435,8 @@ function valideraKontaktfalt(data) {
 /* Steg 0 – Välj spår och kontaktuppgifter */
 function valideraKontakt(data) {
   const fel = {};
-  if (!data.spar) fel.spar = 'Välj det alternativ som passar dig bäst.';
+  if (!data.medlemskap) fel.medlemskap = 'Välj det alternativ som passar dig bäst.';
+  else if (!data.spar) fel.spar = 'Välj om du är läkare eller studerar till läkare.';
   Object.assign(fel, valideraKontaktfalt(data));
   if (!data.samtycke) fel.samtycke = 'Du behöver godkänna att vi behandlar dina personuppgifter för att kunna gå vidare.';
   return fel;
@@ -479,7 +487,6 @@ function valideraUtbildning(data) {
   const fel = {};
   if (arTom(data.examensdatum)) fel.examensdatum = 'Ange datum för din läkarexamen.';
   if (showLegitimationQuestion(data) && !data.svenskLeg) fel.svenskLeg = 'Svara på om du har svensk läkarlegitimation.';
-  if (showAttachment(data) && !(data.legFiler ?? []).length) fel.legFiler = 'Bifoga minst en PDF-fil med dokumentation.';
   return fel;
 }
 

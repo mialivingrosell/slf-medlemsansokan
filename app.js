@@ -68,11 +68,13 @@ function renderLogo() {
 const SCREENS = {
   'valj-spar': {
     layout: 'narrow',
-    render: () => `
+    render: () => {
+      normaliseraSpar();
+      return `
       <div class="page narrow start">
           <section class="intro">
-            <h1>Bli medlem i <br class="mobile-only">Sveriges Läkarförbund</h1>
-            <p>Ju fler medlemmar vi är, desto bättre kan vi driva frågor och påverka svensk hälso- och sjukvård. Ansök om medlemskap, lorem ipsum dolor sit amet.</p>
+            <h1>Bli medlem i <br class="mobile-only">Sveriges läkarförbund</h1>
+            <p>Som medlem i Läkarförbundet får du hjälp och stöd under hela karriären. Vi jobbar för trygga arbetsvillkor, bra lön och goda utvecklingsmöjligheter för läkare i Sverige.</p>
             <ul class="benefits">
               <li>${ICON.badge} Råd och stöd när du behöver det</li>
               <li>${ICON.badge} Unik lönestatistik för din profession</li>
@@ -88,16 +90,10 @@ const SCREENS = {
               <h2>Berätta kort om dig själv</h2>
               <p class="lead">Läkarförbundet finns för alla läkare under hela karriären.</p>
 
-              <fieldset class="options${errClass('spar')}" ${errDescribed('spar')}>
-                <legend class="q-label">Vad passar bäst in på dig?</legend>
-                ${Object.entries(RULES.valjSpar).map(([value, o], i) => `
-                  <label class="option">
-                    <input type="radio" name="spar" value="${value}" ${i === 0 ? 'id="f-spar"' : ''} ${state.spar === value ? 'checked' : ''}>
-                    <span class="radio"></span>
-                    <span>${o.label}${o.note ? `<em class="option-note">${o.note}</em>` : ''}</span>
-                  </label>`).join('')}
-                ${errMsg('spar')}
-              </fieldset>
+              ${valGrupp('medlemskap', 'Vad passar bäst in på dig?', RULES.valjMedlemskap)}
+
+              ${state.medlemskap === 'forbund' ? valGrupp('spar', 'Vilket stämmer på dig?',
+                  { lakare: RULES.valjSpar.lakare, student: RULES.valjSpar.student }, 'spar', true) : ''}
 
               <div class="field${errClass('email')}">
                 <label for="email">E-postadress</label>
@@ -133,10 +129,20 @@ const SCREENS = {
             </form>
 
             ${stegKnappar()}
-      </div>`,
+      </div>`;
+    },
     mount: (root) => {
       const form = root.querySelector('#form');
       form.addEventListener('input', () => collect(form));
+      form.addEventListener('change', (e) => {
+        if (e.target.name !== 'medlemskap') return;
+        collect(form);
+        // Specialitets-/intresseförening är ett eget spår; Sveriges läkarförbund kräver följdfrågan
+        if (state.medlemskap === 'forening') state.spar = 'forening';
+        else if (state.spar === 'forening') state.spar = '';
+        saveState(); pruneErrors(current());
+        rerender(`input[name=medlemskap][value=${state.medlemskap}]`);
+      });
       form.addEventListener('submit', (e) => {
         e.preventDefault();
         collect(form);
@@ -146,7 +152,7 @@ const SCREENS = {
     },
     back: null, // Första steget – Tillbaka är inaktiv i prototypen
     validate: valideraKontakt,
-    fields: ['spar', 'email', 'landskod', 'telefon', 'samtycke'],
+    fields: ['medlemskap', 'spar', 'email', 'landskod', 'telefon', 'samtycke'],
   },
 
   /* ---------- Spår: Yrkesverksam läkare ---------- */
@@ -190,7 +196,8 @@ const SCREENS = {
 
           ${visaBifoga ? `
             <div class="upload${errClass('legFiler')}">
-              <p class="field-legend">Bifoga dokumentation för legitimationsvillkor</p>
+              <p class="field-legend">Bifoga dokumentation</p>
+              <p class="hint">Här kan du bifoga handlingar som styrker din utbildning till läkare samt dokumentation från Socialstyrelsen. Detta är inte ett krav men hjälper oss att kategorisera ditt medlemskap korrekt.</p>
               <p class="hint">En eller flera PDF-filer kan bifogas. Total max filstorlek är 4,5 MB.</p>
               ${filer.length ? `<ul class="files">${filer.map((f, i) => `
                 <li><span>${esc(f.name)} (${formatMB(f.size)})</span>
@@ -246,9 +253,9 @@ const SCREENS = {
       let body;
       if (saknarSvenskLeg(state)) {
         body = `
-          <h2 class="card-heading">Lokalföreningar och yrkesföreningar</h2>
-          <p>Medlemmar i Läkarförbundet som har svensk läkarlegitimation blir också medlemmar i en lokalförening och en yrkesförening.</p>
-          <p>När du har fått din läkarlegitimation kommer du få information om att du kan kontakta oss för att lägga till lokalförening och yrkesförening. Dessa kommer säkra att du får expertstöd i allt från din lokala arbetsmiljö till din karriärspecifika utveckling. Det garanterar att du får rätt hjälp oavsett om frågan rör din specifika arbetsplats eller din yrkesroll.</p>`;
+          <h2 class="card-heading">Lokal- och yrkesföreningar</h2>
+          <p>Medlemmar i Läkarförbundet som har svensk läkarlegitimation blir också medlemmar i en lokalförening och i en yrkesförening. De ger dig lokalt fackligt stöd respektive driver frågor relaterade till din profession.</p>
+          <p>Hör av dig till oss när du har fått en svensk läkarlegitimation så hjälper vi dig att lägga till en lokalförening och en yrkesförening i ditt medlemskap.</p>`;
       } else {
         // Stegvis visning: län → (kommun / sektion) → specialistfrågan → yrkesförening
         const lokal = lokalforening(state);
@@ -259,8 +266,8 @@ const SCREENS = {
           : state.specialist === 'ja' ? state.yrkesforening : null;
         body = `
           <h2 class="card-heading">Hitta dina föreningar</h2>
-          <p>Läkarförbundet har 25 lokalföreningar spridda över hela landet. Som läkare och medlem i Läkarförbundet tillhör du den lokalförening som är verksam där du arbetar.</p>
-          <p>I ditt medlemskap ingår också ett medlemskap i en av våra åtta yrkesföreningar. En yrkesförening driver frågor som är knutet till din ställning och plats i yrket.</p>
+          <p>I ditt medlemskap i Läkarförbundet ingår ett medlemskap i en lokalförening och i en yrkesförening. Lokalföreningen är verksam på den ort du arbetar och representerar medlemmar lokalt i fackliga frågor.</p>
+          <p>Yrkesföreningen driver frågor kopplade till din profession. En del av våra yrkesföreningar har lokala avdelningar. Du blir tilldelad en lokalavdelning av din yrkesförening om en sådan finns på din ort.</p>
 
           ${dropdown('lan', 'I vilket län har du din primära arbetsplats?', 'Välj län',
               LAN.map(([value, label]) => ({ value, label })))}
@@ -341,23 +348,23 @@ const SCREENS = {
         ])}
         ${saknarSvenskLeg(state) ? '' : summaryCard('Dina föreningar', 'lakare-yrke', foreningar.length ? foreningar : [['Föreningar', '–']],
           disclosure('merInfoForeningar', 'Mer information om lokalföreningar och yrkesföreningar', `
-            <p>Förutom att du blir medlem i vårt fackförbund Sveriges Läkarförening blir du också medlem i en lokalförening och en yrkesförening. Här måste vi också förtydliga att man måste vara med i dessa föreningar. Det kostar inget extra för medlemskap i sektioner för lokalföreningar, men några sektioner för yrkesföreningar tar en avgift.</p>`))}
+            <p>Våra lokalföreningar ger fackligt stöd och råd i din arbetsvardag. De verkar lokalt för att läkare ska ha ett så bra arbetsliv som möjligt. När du blir medlem i Läkarförbundet blir du också medlem i den lokalförening som är aktiv i den ort där du arbetar.</p>
+            <p>Ett medlemskap i Läkarförbundet innehåller också ett medlemskap i en yrkesförening. Yrkesföreningen driver frågor kopplade till din profession.</p>`))}
 
         <section class="card summary summary-fee">
           <h2>Månadsavgift</h2>
-          <p class="fee-text">${saknarSvenskLeg(state)
-            ? 'Om du är utbildad till läkare utomlands, men ännu inte fått din svenska läkarlegitimation betalar du en lägre medlemsavgift.'
-            : 'Din månadsavgift baseras på typ av medlemskap samt vilken lokalförening och yrkesförening du blir medlem i.'}</p>
+          ${saknarSvenskLeg(state)
+            ? '<p class="fee-text">Om du är utbildad till läkare utomlands, men ännu inte fått din svenska läkarlegitimation betalar du en lägre medlemsavgift.</p>'
+            : ''}
           <dl class="summary-list summary-fee-list"><dt>Avgift</dt><dd>${manadsavgift(state)} kr</dd></dl>
           ${disclosure('visaIngar', 'Vad ingår i medlemskapet?', `
-            <p>Din månadsavgift baseras på typ av medlemskap samt vilken lokalförening och yrkesförening du blir medlem i. Inkluderat i medlemskapet är bland annat:</p>
+            <p>Din månadsavgift består av en avgift för ditt förbundsmedlemskap, din lokalförening och din yrkesförening. Vi driver frågor som är relaterade till din profession, dina villkor och din lön – så att du kan fokusera på ditt jobb. I medlemskapet ingår bland annat:</p>
             <ul>
-              <li>Medlemskap i Läkarförbundet, lokalförening och yrkesförening inkl. ev sektioner</li>
-              <li>Inkomstförsäkring via Folksam</li>
-              <li>Läkartidningen 10 ggr/år</li>
-              <li>Möjlighet att hyra förbundets egna fritidsboenden</li>
-            </ul>
-            <p>Notera att medlemskap i Läkarförbundet inte inkluderar a-kassa, och någonting mer om detta.</p>`)}
+              <li>En inkomstförsäkring.</li>
+              <li>Stöd, råd och representation när du behöver det.</li>
+              <li>Medlemsförmåner inom till exempel försäkringar, banklån, resor, fritidsboenden och hotell.</li>
+              <li>Läkartidningen.</li>
+            </ul>`)}
         </section>
 
         ${signeraKnappar(bankid)}
@@ -463,10 +470,11 @@ const SCREENS = {
           <p class="fee-text">Som läkarstuderande betalar du en reducerad avgift för ditt medlemskap.</p>
           <dl class="summary-list summary-fee-list"><dt>Avgift</dt><dd>${AVGIFT_STUDENT} kr per år</dd></dl>
           ${disclosure('visaIngarStudent', 'Vad ingår i medlemskapet?', `
-            <p>[Text saknas i skissen] Inkluderat i studentmedlemskapet är bland annat:</p>
+            <p>Som läkarstuderande blir du medlem i ${STUDENT_YRKESFORENING} och i den lokalavdelning som är verksam där du studerar. Som medlem får du bland annat:</p>
             <ul>
-              <li>Medlemskap i ${STUDENT_YRKESFORENING} och din lokalavdelning</li>
-              <li>Råd och stöd under studietiden</li>
+              <li>Medlemsförmåner, till exempel rabatt på studentlitteratur, försäkringar, resor och hotell.</li>
+              <li>Råd och stöd från vår medlemsrådgivning.</li>
+              <li>Inbjudan till lokala aktiviteter på din studieort.</li>
             </ul>`)}
         </section>
 
@@ -622,7 +630,8 @@ function uppgiftsRader() {
  * TODO: slutlig text kommer från SLF. */
 const VARFOR_YRKESFORENING = {
   label: 'Varför blir jag medlem i en yrkesförening?',
-  text: '<p>Som medlem i Sveriges Läkarförbund blir du också medlem i en yrkesförening och en lokalavdelning. Yrkesföreningen samlar läkare i samma yrkesskede, och lokalavdelningen finns nära dig.</p>',
+  text: '<p>När du studerar till läkare är du medlem i Sveriges läkarförbund student. Vi är en yrkesförening som tar tillvara på svenska läkarstudenters intressen – både i Sverige och utomlands.</p>'
+      + '<p>Som studentmedlem tillhör du också den lokala studentavdelningen på den ort där du studerar. Lokalavdelningen arbetar med frågor som främjar läkarstudenter på det aktuella lärosätet och ordnar aktiviteter av olika slag lokalt.</p>',
 };
 
 function summaryCard(title, editTarget, rows, extra = '') {
@@ -659,6 +668,27 @@ function stegKnappar() {
     </div>`;
 }
 
+/* Steg 0: radioknappar i "kortstil" (options/option), med ev. kursiv notering som visas när valet är markerat. */
+function valGrupp(name, legend, val, reveal, legendAlltid = false) {
+  return `
+    <fieldset class="options${errClass(name)}" ${errDescribed(name)} ${revealAttr(reveal)}>
+      <legend class="q-label${legendAlltid ? ' q-label-always' : ''}">${legend}</legend>
+      ${Object.entries(val).map(([value, o], i) => `
+        <label class="option">
+          <input type="radio" name="${name}" value="${value}" ${i === 0 ? `id="f-${name}"` : ''} ${state[name] === value ? 'checked' : ''}>
+          <span class="radio"></span>
+          <span>${o.label}${o.note ? `<em class="option-note">${o.note}</em>` : ''}</span>
+        </label>`).join('')}
+      ${errMsg(name)}
+    </fieldset>`;
+}
+
+/* Sparat läge från före 2026-10-23 har bara "spar" – härled det övre valet. */
+function normaliseraSpar() {
+  if (state.medlemskap || !state.spar) return;
+  state.medlemskap = state.spar === 'forening' ? 'forening' : 'forbund';
+}
+
 function signeraKnappar(bankid) {
   return `
     <div class="actions actions-split">
@@ -669,8 +699,8 @@ function signeraKnappar(bankid) {
     ${bankid ? `
       <div class="no-bankid">
         ${disclosure('utanBankid', 'Jag har inte BankID', `
-          <!-- TODO: platshållartext – byt mot slutlig copy från SLF -->
-          <p>Utan BankID kan du inte skicka in ansökan digitalt. Kontakta medlemsservice så hjälper vi dig.</p>`)}
+          <p>Du kan inte skicka in din ansökan digitalt om du inte har BankID. Vänligen ta kontakt med vår medlemsservice för att slutföra din ansökan.</p>
+          <p><a href="https://slf.se/om-oss/kontakt/" target="_blank" rel="noopener">Kontakt</a></p>`)}
       </div>` : ''}`;
 }
 
@@ -1052,7 +1082,7 @@ document.addEventListener('click', (e) => {
  * Felet visas under fältet: röd ram + varningsikon + röd text (ingen sammanfattning).
  * ================================================================ */
 const errorState = {};
-const FIELD_IDS = { spar: 'f-spar', email: 'email', pnr: 'pnr' };
+const FIELD_IDS = { medlemskap: 'f-medlemskap', spar: 'f-spar', email: 'email', pnr: 'pnr' };
 const fieldId = (name) => FIELD_IDS[name] ?? `f-${name}`;
 const currentErrors = () => errorState[current()]?.errors ?? {};
 
