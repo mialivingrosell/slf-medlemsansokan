@@ -1288,6 +1288,19 @@ document.getElementById('close').addEventListener('click', resetAll);
 document.getElementById('reset-step').addEventListener('click', resetStep);
 document.getElementById('reset-all').addEventListener('click', resetAll);
 
+/* Färgversioner (2026-10-23): länk nere till höger växlar, valet sparas i localStorage (se index.html). */
+function visaFargLank() {
+  const annan = document.documentElement.dataset.farg === '2' ? '1' : '2';
+  const link = document.getElementById('farg-link');
+  link.textContent = `Visa färgversion ${annan}`;
+  link.onclick = () => {
+    document.documentElement.dataset.farg = annan;
+    try { localStorage.setItem('slf-farg', annan); } catch {}
+    visaFargLank();
+  };
+}
+visaFargLank();
+
 /* Tangentbord i öppen rullgardin: pil upp/ned flyttar, Enter väljer, Esc stänger.
  * Sökbar rullgardin: fokus stannar i sökfältet och aktivt alternativ markeras (aria-activedescendant). */
 document.addEventListener('keydown', (e) => {
