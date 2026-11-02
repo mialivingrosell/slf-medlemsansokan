@@ -286,7 +286,7 @@ const SCREENS = {
                 YRKESFORENINGAR.map(n => ({ value: n, label: n })), { reveal: 'yrkesforening' }) : ''}
 
             ${yrkesforening ? infoBox(`Din yrkesförening är <strong>${yrkesforening}.</strong>${lokalavd
-                ? ` Din lokalavdelning är <strong>${lokalavd}.</strong>` : ''}`, 'yrkesbox') : ''}` : ''}`;
+                ? `<br>Din lokalavdelning är <strong>${lokalavd}.</strong>` : ''}`, 'yrkesbox') : ''}` : ''}`;
       }
       return `
       <div class="page narrow">
@@ -399,7 +399,7 @@ const SCREENS = {
             ${textField('universitetUtl', 'Universitet (utomlands)', {})}
             ${dropdown('studieland', 'Land', 'Välj land', COUNTRIES.filter(c => c[0] !== 'se').map(([value, label]) => ({ value, label })))}` : ''}
           ${avd ? `
-            ${infoBox(`Din yrkesförening är <strong>${STUDENT_YRKESFORENING}.</strong> Din lokalavdelning är <strong>${avd}.</strong>`)}
+            ${infoBox(`Din yrkesförening är <strong>${STUDENT_YRKESFORENING}.</strong><br>Din lokalavdelning är <strong>${avd}.</strong>`)}
             ${disclosure('varforYrkesforeningUtb', VARFOR_YRKESFORENING.label, VARFOR_YRKESFORENING.text)}
             <div class="field${errClass('examensdatumStudent')}">
               <label for="f-examensdatumStudent">Förväntat examensdatum</label>
