@@ -31,6 +31,9 @@
 :root[data-farg="6"] { --bg: #F9F7F5; --card: #C2E1E4; --info: #F9F7F5; }
 :root[data-farg="7"] { --bg: #E5F6F8; --card: #F9F7F5; --info: #E5F6F8; }
 :root[data-farg="8"] { --bg: #F9F7F5; --card: #E5F6F8; --info: #F9F7F5; }
+/* E5F6F8 (version 7–8): tunn blå ram runt kort och föreningsrutor */
+:root[data-farg="7"] .card, :root[data-farg="8"] .card,
+:root[data-farg="7"] .info-box, :root[data-farg="8"] .info-box { border: 1px solid var(--blue); }
 
 * { box-sizing: border-box; }
 html, body { margin: 0; }
