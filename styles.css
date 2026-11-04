@@ -15,6 +15,7 @@
   --border: #8c8c8c;
   /* Knappar enligt Mias referens 2026-11-04: rundade hörn, medelfet och något större text */
   --btn-radius: 5px;
+  --ram: 2px; /* tjocklek: vald radioknappsruta + blå ramar i version 7–8 */
   --btn-weight: 500;
   --btn-size: 16px;
   --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
@@ -31,9 +32,10 @@
 :root[data-farg="6"] { --bg: #F9F7F5; --card: #C2E1E4; --info: #F9F7F5; }
 :root[data-farg="7"] { --bg: #E5F6F8; --card: #F9F7F5; --info: #E5F6F8; }
 :root[data-farg="8"] { --bg: #F9F7F5; --card: #E5F6F8; --info: #F9F7F5; }
-/* E5F6F8 (version 7–8): tunn blå ram runt kort och föreningsrutor */
+/* E5F6F8 (version 7–8): tunn blå ram runt kort, föreningsrutor och rutan med hämtade personuppgifter */
 :root[data-farg="7"] .card, :root[data-farg="8"] .card,
-:root[data-farg="7"] .info-box, :root[data-farg="8"] .info-box { border: 1px solid var(--blue); }
+:root[data-farg="7"] .info-box, :root[data-farg="8"] .info-box,
+:root[data-farg="7"] .fetched, :root[data-farg="8"] .fetched { border: var(--ram) solid var(--blue); }
 
 * { box-sizing: border-box; }
 html, body { margin: 0; }
@@ -137,7 +139,7 @@ button { font: inherit; cursor: pointer; }
   content: ''; width: 15px; height: 15px; border-radius: 50%; background: var(--blue);
 }
 /* Vald: tjockare blå ram (inset-skugga, så att innehållet inte flyttar sig) */
-.option:has(input:checked) { border-color: var(--blue); box-shadow: inset 0 0 0 1.5px var(--blue); }
+.option:has(input:checked) { border-color: var(--blue); box-shadow: inset 0 0 0 calc(var(--ram) - 1px) var(--blue); }
 .option:has(input:focus-visible) { outline: 2px solid var(--blue); outline-offset: 2px; }
 
 /* Fält */
@@ -311,7 +313,7 @@ body[data-layout="narrow"] .header {
 /* Hämtade uppgifter */
 .fetched {
   display: grid; grid-template-columns: max-content 1fr; gap: 10px 30px;
-  background: var(--info); margin: 28px 0 0; padding: 36px 52px 34px;
+  background: var(--info); margin: 28px 0 0; padding: 36px 52px 34px; border-radius: var(--btn-radius);
   font-variant-numeric: tabular-nums;
 }
 .fetched dt { font-weight: 700; text-align: right; }
@@ -393,7 +395,7 @@ body[data-layout="narrow"] .header {
 .card-text > p + .field, .card-text > p + .options { margin-top: 30px; }
 
 .info-box {
-  background: var(--info); padding: 24px 28px; margin: 0 0 30px;
+  background: var(--info); padding: 24px 28px; margin: 0 0 30px; border-radius: var(--btn-radius);
   text-align: center; line-height: 1.45;
 }
 
