@@ -9,10 +9,10 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
   <link rel="stylesheet" href="styles.css">
   <script>
-    // Färgversion 1–6 (1 = förvald). ?farg=3 i länken väljer version 3 direkt; valet sparas i webbläsaren.
+    // Färgversion 1–8 (1 = förvald). ?farg=3 i länken väljer version 3 direkt; valet sparas i webbläsaren.
     (function () {
       var p = new URLSearchParams(location.search).get('farg');
-      var ok = /^[1-6]$/;
+      var ok = /^[1-8]$/;
       try { if (ok.test(p)) localStorage.setItem('slf-farg', p); p = localStorage.getItem('slf-farg'); } catch (e) {}
       document.documentElement.dataset.farg = ok.test(p) ? p : '1';
     })();
