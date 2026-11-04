@@ -13,6 +13,10 @@
   --option: #f1f1f1;
   --option-selected: #d6d6d6;
   --border: #8c8c8c;
+  /* Knappar enligt Mias referens 2026-11-04: rundade hörn, medelfet och något större text */
+  --btn-radius: 5px;
+  --btn-weight: 500;
+  --btn-size: 16px;
   --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
 }
 :root[data-farg="2"] {
@@ -23,10 +27,8 @@
 /* Nya nyanser att testa (2026-11-04) – inte godkända av SLF än */
 :root[data-farg="3"] { --bg: #B8D8E0; --card: #F9F7F5; --info: #B8D8E0; }
 :root[data-farg="4"] { --bg: #F9F7F5; --card: #B8D8E0; --info: #F9F7F5; }
-:root[data-farg="5"] { --bg: #B3E0E5; --card: #F9F7F5; --info: #B3E0E5; }
-:root[data-farg="6"] { --bg: #F9F7F5; --card: #B3E0E5; --info: #F9F7F5; }
-:root[data-farg="7"] { --bg: #C2E1E4; --card: #F9F7F5; --info: #C2E1E4; }
-:root[data-farg="8"] { --bg: #F9F7F5; --card: #C2E1E4; --info: #F9F7F5; }
+:root[data-farg="5"] { --bg: #C2E1E4; --card: #F9F7F5; --info: #C2E1E4; }
+:root[data-farg="6"] { --bg: #F9F7F5; --card: #C2E1E4; --info: #F9F7F5; }
 
 * { box-sizing: border-box; }
 html, body { margin: 0; }
@@ -188,9 +190,9 @@ button { font: inherit; cursor: pointer; }
   margin: 30px 0 0 0;
 }
 .btn-primary {
-  background: var(--blue); color: #fff; border: 0; border-radius: 2px;
+  background: var(--blue); color: #fff; border: 0; border-radius: var(--btn-radius);
   min-width: 276px; height: 50px; padding: 0 24px;
-  font-weight: 700; font-size: 15px;
+  font-weight: var(--btn-weight); font-size: var(--btn-size);
 }
 .btn-primary:hover { background: var(--blue-dark); }
 .btn-back {
@@ -370,8 +372,8 @@ body[data-layout="narrow"] .header {
 .files .icon-btn svg { width: 18px; height: 18px; }
 .btn-outline {
   display: inline-grid; place-items: center;
-  min-width: 136px; height: 51px; padding: 0 24px; border-radius: 2px;
-  background: #fff; color: var(--blue); font-weight: 700;
+  min-width: 136px; height: 51px; padding: 0 24px; border-radius: var(--btn-radius);
+  background: #fff; color: var(--blue); font-weight: var(--btn-weight); font-size: var(--btn-size);
   box-shadow: inset 0 0 0 1.5px var(--blue); cursor: pointer;
 }
 .btn-outline:hover { background: #f2f6fc; }
@@ -476,7 +478,7 @@ body[data-layout="site"] > .header { display: none; }
 .site-nav { display: flex; gap: 16px; }
 .site-btn {
   display: inline-flex; align-items: center; gap: 10px; height: 41px; padding: 0 16px;
-  background: #0a3f8a; color: #fff; border: 0; border-radius: 3px; font-weight: 700; font-size: 15px; cursor: default;
+  background: #0a3f8a; color: #fff; border: 0; border-radius: var(--btn-radius); font-weight: 700; font-size: 15px; cursor: default;
 }
 .site-btn svg { width: 19px; height: 19px; }
 .site-btn-green { background: #1e8f6c; cursor: pointer; }
@@ -491,7 +493,7 @@ body[data-layout="site"] > .header { display: none; }
 .puff h2 { font-size: 20px; margin: 0 0 12px; line-height: 1.3; }
 .puff p { margin: 0 0 22px; }
 .btn-green {
-  background: var(--green); color: #fff; border: 0; border-radius: 2px; border-bottom: 3px solid #1e8f6c;
+  background: var(--green); color: #fff; border: 0; border-radius: var(--btn-radius); border-bottom: 3px solid #1e8f6c;
   height: 47px; padding: 0 25px; font-weight: 700; font-size: 15px; cursor: default;
 }
 .btn-green-wide { min-width: 221px; margin-top: 12px; }
@@ -621,8 +623,8 @@ body[data-layout="site"] > .header { display: none; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 28px; }
 .modal .btn-primary { min-width: 130px; }
 .btn-secondary {
-  background: #fff; color: var(--blue); border: 0; border-radius: 2px; box-shadow: inset 0 0 0 1.5px var(--blue);
-  height: 50px; min-width: 130px; padding: 0 24px; font-weight: 700; font-size: 15px;
+  background: #fff; color: var(--blue); border: 0; border-radius: var(--btn-radius); box-shadow: inset 0 0 0 1.5px var(--blue);
+  height: 50px; min-width: 130px; padding: 0 24px; font-weight: var(--btn-weight); font-size: var(--btn-size);
 }
 .btn-secondary:hover { background: #f2f6fc; }
 @media (max-width: 899px) {

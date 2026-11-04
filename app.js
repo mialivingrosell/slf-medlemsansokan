@@ -1289,16 +1289,14 @@ document.getElementById('reset-step').addEventListener('click', resetStep);
 document.getElementById('reset-all').addEventListener('click', resetAll);
 
 /* Färgversioner: lista nere till höger växlar, valet sparas i localStorage (se index.html).
- * 1–2 = SLF:s godkända färger (2026-10-23), 3–8 = nya nyanser att testa (2026-11-04). Färgerna finns i styles.css. */
+ * 1–2 = SLF:s godkända färger (2026-10-23), 3–6 = nya nyanser att testa (2026-11-04). Färgerna finns i styles.css. */
 const FARGVERSIONER = [
   ['1', 'ljusblå bakgrund (SLF)'],
   ['2', 'ljusblå kort (SLF)'],
   ['3', 'B8D8E0 bakgrund'],
   ['4', 'B8D8E0 kort'],
-  ['5', 'B3E0E5 bakgrund'],
-  ['6', 'B3E0E5 kort'],
-  ['7', 'C2E1E4 bakgrund'],
-  ['8', 'C2E1E4 kort'],
+  ['5', 'C2E1E4 bakgrund'],
+  ['6', 'C2E1E4 kort'],
 ];
 function visaFargLista() {
   const aktiv = document.documentElement.dataset.farg;
