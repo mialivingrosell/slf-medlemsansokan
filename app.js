@@ -1288,18 +1288,29 @@ document.getElementById('close').addEventListener('click', resetAll);
 document.getElementById('reset-step').addEventListener('click', resetStep);
 document.getElementById('reset-all').addEventListener('click', resetAll);
 
-/* Färgversioner (2026-10-23): länk nere till höger växlar, valet sparas i localStorage (se index.html). */
-function visaFargLank() {
-  const annan = document.documentElement.dataset.farg === '2' ? '1' : '2';
-  const link = document.getElementById('farg-link');
-  link.textContent = `Visa färgversion ${annan}`;
-  link.onclick = () => {
-    document.documentElement.dataset.farg = annan;
-    try { localStorage.setItem('slf-farg', annan); } catch {}
-    visaFargLank();
-  };
+/* Färgversioner: lista nere till höger växlar, valet sparas i localStorage (se index.html).
+ * 1–2 = SLF:s godkända färger (2026-10-23), 3–6 = nya nyanser att testa (2026-11-04). Färgerna finns i styles.css. */
+const FARGVERSIONER = [
+  ['1', 'ljusblå bakgrund (SLF)'],
+  ['2', 'ljusblå kort (SLF)'],
+  ['3', 'B8D8E0 bakgrund'],
+  ['4', 'B8D8E0 kort'],
+  ['5', 'B3E0E5 bakgrund'],
+  ['6', 'B3E0E5 kort'],
+];
+function visaFargLista() {
+  const aktiv = document.documentElement.dataset.farg;
+  const lista = document.getElementById('farg-list');
+  lista.innerHTML = FARGVERSIONER.map(([nr, namn]) => nr === aktiv
+    ? `<li><span class="proto-reset is-current" aria-current="true">Färgversion ${nr} – ${namn}</span></li>`
+    : `<li><button type="button" class="proto-reset" data-farg="${nr}">Visa färgversion ${nr} – ${namn}</button></li>`).join('');
+  lista.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => {
+    document.documentElement.dataset.farg = btn.dataset.farg;
+    try { localStorage.setItem('slf-farg', btn.dataset.farg); } catch {}
+    visaFargLista();
+  }));
 }
-visaFargLank();
+visaFargLista();
 
 /* Tangentbord i öppen rullgardin: pil upp/ned flyttar, Enter väljer, Esc stänger.
  * Sökbar rullgardin: fokus stannar i sökfältet och aktivt alternativ markeras (aria-activedescendant). */

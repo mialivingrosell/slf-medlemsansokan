@@ -1,6 +1,6 @@
 :root {
   /* Färger från SLF 2026-10-23: ljusblå #D3EDF0, vit #F9F7F5, primärblå #004DA5, turkosgrön #4BB69A.
-   * Färgversion 1 (förvald) här, version 2 under :root[data-farg="2"]. */
+   * Färgversion 1 (förvald) här, version 2–6 under :root[data-farg="N"]. Udda = färgad bakgrund, jämna = färgade kort. */
   --bg: #D3EDF0;
   --card: #F9F7F5;
   --info: #D3EDF0; /* rutorna med föreningsnamn */
@@ -20,6 +20,11 @@
   --card: #DFEEF0;
   --info: #F9F7F5;
 }
+/* Nya nyanser att testa (2026-11-04) – inte godkända av SLF än */
+:root[data-farg="3"] { --bg: #B8D8E0; --card: #F9F7F5; --info: #B8D8E0; }
+:root[data-farg="4"] { --bg: #F9F7F5; --card: #B8D8E0; --info: #F9F7F5; }
+:root[data-farg="5"] { --bg: #B3E0E5; --card: #F9F7F5; --info: #B3E0E5; }
+:root[data-farg="6"] { --bg: #F9F7F5; --card: #B3E0E5; --info: #F9F7F5; }
 
 * { box-sizing: border-box; }
 html, body { margin: 0; }
@@ -628,5 +633,12 @@ body[data-layout="site"] > .header { display: none; }
 .info-box + .disclosure-block { margin: -12px 0 30px; }
 
 /* Växla färgversion – testverktyg nere till höger */
-.proto-farg { position: fixed; right: 14px; bottom: 12px; z-index: 10; }
-@media (max-width: 600px) { .proto-farg { bottom: 38px; } }
+.proto-farg {
+  position: fixed; right: 14px; bottom: 12px; z-index: 10;
+  list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; justify-items: end;
+}
+.proto-farg .is-current { text-decoration: none; font-weight: 700; color: #6a6a6a; cursor: default; }
+/* Smalare fönster: listan ligger sist på sidan i stället för att täcka kortet */
+@media (max-width: 1299px) {
+  .proto-farg { position: static; margin: 0 14px 20px; }
+}
