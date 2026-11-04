@@ -32,10 +32,10 @@
 :root[data-farg="6"] { --bg: #F9F7F5; --card: #C2E1E4; --info: #F9F7F5; }
 :root[data-farg="7"] { --bg: #E5F6F8; --card: #F9F7F5; --info: #E5F6F8; }
 :root[data-farg="8"] { --bg: #F9F7F5; --card: #E5F6F8; --info: #F9F7F5; }
-/* E5F6F8 (version 7–8): tunn blå ram runt kort, föreningsrutor och rutan med hämtade personuppgifter */
+/* E5F6F8 (version 7–8): skugga (som på slf.se) runt kort, föreningsrutor och rutan med hämtade personuppgifter */
 :root[data-farg="7"] .card, :root[data-farg="8"] .card,
 :root[data-farg="7"] .info-box, :root[data-farg="8"] .info-box,
-:root[data-farg="7"] .fetched, :root[data-farg="8"] .fetched { border: var(--ram) solid var(--blue); }
+:root[data-farg="7"] .fetched, :root[data-farg="8"] .fetched { box-shadow: 0 2px 8px rgba(0,0,0,.10), 0 1px 2px rgba(0,0,0,.06); }
 
 * { box-sizing: border-box; }
 html, body { margin: 0; }
