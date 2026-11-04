@@ -29,6 +29,8 @@
 :root[data-farg="4"] { --bg: #F9F7F5; --card: #B8D8E0; --info: #F9F7F5; }
 :root[data-farg="5"] { --bg: #C2E1E4; --card: #F9F7F5; --info: #C2E1E4; }
 :root[data-farg="6"] { --bg: #F9F7F5; --card: #C2E1E4; --info: #F9F7F5; }
+:root[data-farg="7"] { --bg: #E5F6F8; --card: #F9F7F5; --info: #E5F6F8; }
+:root[data-farg="8"] { --bg: #F9F7F5; --card: #E5F6F8; --info: #F9F7F5; }
 
 * { box-sizing: border-box; }
 html, body { margin: 0; }
