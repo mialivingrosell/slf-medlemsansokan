@@ -1288,32 +1288,6 @@ document.getElementById('close').addEventListener('click', resetAll);
 document.getElementById('reset-step').addEventListener('click', resetStep);
 document.getElementById('reset-all').addEventListener('click', resetAll);
 
-/* Färgversioner: lista nere till höger växlar, valet sparas i localStorage (se index.html).
- * 1–2 = SLF:s godkända färger (2026-10-23), 3–8 = nya nyanser att testa (2026-11-04). Färgerna finns i styles.css. */
-const FARGVERSIONER = [
-  ['1', 'ljusblå bakgrund (SLF)'],
-  ['2', 'ljusblå kort (SLF)'],
-  ['3', 'B8D8E0 bakgrund'],
-  ['4', 'B8D8E0 kort'],
-  ['5', 'C2E1E4 bakgrund'],
-  ['6', 'C2E1E4 kort'],
-  ['7', 'E5F6F8 bakgrund'],
-  ['8', 'E5F6F8 kort'],
-];
-function visaFargLista() {
-  const aktiv = document.documentElement.dataset.farg;
-  const lista = document.getElementById('farg-list');
-  lista.innerHTML = FARGVERSIONER.map(([nr, namn]) => nr === aktiv
-    ? `<li><span class="proto-reset is-current" aria-current="true">Färgversion ${nr} – ${namn}</span></li>`
-    : `<li><button type="button" class="proto-reset" data-farg="${nr}">Visa färgversion ${nr} – ${namn}</button></li>`).join('');
-  lista.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => {
-    document.documentElement.dataset.farg = btn.dataset.farg;
-    try { localStorage.setItem('slf-farg', btn.dataset.farg); } catch {}
-    visaFargLista();
-  }));
-}
-visaFargLista();
-
 /* Tangentbord i öppen rullgardin: pil upp/ned flyttar, Enter väljer, Esc stänger.
  * Sökbar rullgardin: fokus stannar i sökfältet och aktivt alternativ markeras (aria-activedescendant). */
 document.addEventListener('keydown', (e) => {

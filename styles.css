@@ -1,9 +1,10 @@
 :root {
   /* Färger från SLF 2026-10-23: ljusblå #D3EDF0, vit #F9F7F5, primärblå #004DA5, turkosgrön #4BB69A.
-   * Färgversion 1 (förvald) här, version 2–6 under :root[data-farg="N"]. Udda = färgad bakgrund, jämna = färgade kort. */
-  --bg: #D3EDF0;
-  --card: #F9F7F5;
-  --info: #D3EDF0; /* rutorna med föreningsnamn */
+   * Vald färgsättning (2026-11-06, tidigare färgversion 2): vit bakgrund, ljusblå kort. */
+  --bg: #F9F7F5;
+  --card: #DFEEF0;
+  --info: #F9F7F5; /* rutorna med föreningsnamn och hämtade personuppgifter */
+  --skugga: 0 2px 8px rgba(0,0,0,.10), 0 1px 2px rgba(0,0,0,.06); /* som på slf.se */
   --text: #1f1f1f;
   --muted: #7a7a7a;
   --blue: #004DA5;
@@ -15,26 +16,11 @@
   --border: #8c8c8c;
   /* Knappar enligt Mias referens 2026-11-04: rundade hörn, medelfet och något större text */
   --btn-radius: 5px;
-  --ram: 2px; /* tjocklek: vald radioknappsruta + blå ramar i version 7–8 */
+  --ram: 2px; /* tjocklek: vald radioknappsruta */
   --btn-weight: 500;
   --btn-size: 16px;
   --font: 'Graphik', 'Graphik Trial', 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
 }
-:root[data-farg="2"] {
-  --bg: #F9F7F5;
-  --card: #DFEEF0;
-  --info: #F9F7F5;
-}
-/* Nya nyanser att testa (2026-11-04) – inte godkända av SLF än */
-:root[data-farg="3"] { --bg: #B8D8E0; --card: #F9F7F5; --info: #B8D8E0; }
-:root[data-farg="4"] { --bg: #F9F7F5; --card: #B8D8E0; --info: #F9F7F5; }
-:root[data-farg="5"] { --bg: #C2E1E4; --card: #F9F7F5; --info: #C2E1E4; }
-:root[data-farg="6"] { --bg: #F9F7F5; --card: #C2E1E4; --info: #F9F7F5; }
-:root[data-farg="7"] { --bg: #E5F6F8; --card: #F9F7F5; --info: #E5F6F8; }
-:root[data-farg="8"] { --bg: #F9F7F5; --card: #E5F6F8; --info: #F9F7F5; }
-/* Version 1–2 och 7–8: skugga (som på slf.se) runt kort, föreningsrutor och rutan med hämtade personuppgifter */
-:root:is([data-farg="1"], [data-farg="2"], [data-farg="7"], [data-farg="8"]) :is(.card, .info-box, .fetched) { box-shadow: 0 2px 8px rgba(0,0,0,.10), 0 1px 2px rgba(0,0,0,.06); }
-
 * { box-sizing: border-box; }
 html, body { margin: 0; }
 body {
@@ -106,7 +92,7 @@ button { font: inherit; cursor: pointer; }
   background: var(--card);
   border-radius: 8px;
   padding: 40px 60px 36px 60px;
-  box-shadow: 0 1px 2px rgba(0,0,0,.03);
+  box-shadow: var(--skugga);
 }
 .card h2 {
   font-size: 23px; font-weight: 700; letter-spacing: -0.01em;
@@ -308,6 +294,7 @@ body { padding-bottom: 48px; }
 .fetched {
   display: grid; grid-template-columns: max-content 1fr; gap: 10px 30px;
   background: var(--info); margin: 28px 0 0; padding: 36px 52px 34px; border-radius: var(--btn-radius);
+  box-shadow: var(--skugga);
   font-variant-numeric: tabular-nums;
 }
 .fetched dt { font-weight: 700; text-align: right; }
@@ -389,6 +376,7 @@ body { padding-bottom: 48px; }
 
 .info-box {
   background: var(--info); padding: 24px 28px; margin: 0 0 30px; border-radius: var(--btn-radius);
+  box-shadow: var(--skugga);
   text-align: center; line-height: 1.45;
 }
 
@@ -636,13 +624,3 @@ body[data-layout="site"] > .header { display: none; }
 /* Utfällbar förklaring direkt under en blå ruta (studentens steg Utbildning) */
 .info-box + .disclosure-block { margin: -12px 0 30px; }
 
-/* Växla färgversion – testverktyg nere till höger */
-.proto-farg {
-  position: fixed; right: 14px; bottom: 12px; z-index: 10;
-  list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; justify-items: end;
-}
-.proto-farg .is-current { text-decoration: none; font-weight: 700; color: #6a6a6a; cursor: default; }
-/* Smalare fönster: listan ligger sist på sidan i stället för att täcka kortet */
-@media (max-width: 1299px) {
-  .proto-farg { position: static; margin: 0 14px 20px; }
-}
