@@ -167,6 +167,8 @@ button { font: inherit; cursor: pointer; }
   margin: 50px 0 0 0; cursor: pointer; line-height: 1.2;
 }
 .consent input { position: absolute; opacity: 0; pointer-events: none; }
+/* Första textraden centreras mot kryssrutan (27 px), även när texten bryts på flera rader */
+.consent > span:last-child { padding-top: calc((27px - 1lh) / 2); }
 .checkbox {
   width: 27px; height: 27px; border: 1.5px solid var(--text); border-radius: 3px;
   background: #fff; display: grid; place-items: center;
