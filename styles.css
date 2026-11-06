@@ -18,7 +18,7 @@
   --ram: 2px; /* tjocklek: vald radioknappsruta + blå ramar i version 7–8 */
   --btn-weight: 500;
   --btn-size: 16px;
-  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  --font: 'Graphik', 'Graphik Trial', 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
 }
 :root[data-farg="2"] {
   --bg: #F9F7F5;
