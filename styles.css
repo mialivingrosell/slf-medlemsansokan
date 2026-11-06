@@ -50,13 +50,13 @@ button { font: inherit; cursor: pointer; }
 
 /* ---------- Header ---------- */
 .header {
-  /* Loggan linjerar med innehållet, krysset sitter längst ut till höger */
-  padding: 38px 46px 0 max(40px, calc((100vw - 1250px) / 2 + 40px));
+  /* Som nuvarande medlemsansökan: liten logga uppe till vänster, krysset speglat till höger */
+  padding: 20px max(32px, calc((100vw - 1046px) / 2)) 0;
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
 }
-.logo { display: block; height: 86px; }
+.logo { display: block; height: 52px; }
 .logo img { height: 100%; width: auto; display: block; }
 .logo svg { height: 100%; width: auto; display: block; }
 
@@ -218,7 +218,7 @@ button { font: inherit; cursor: pointer; }
 
 /* ---------- Mobil ---------- */
 @media (max-width: 899px) {
-  .header { padding: 30px 32px 0 32px; }
+  .header { padding: 20px 32px 0 32px; }
   .logo { height: 46px; }
   .page { padding: 0 0 40px 0; }
   .lang-row { justify-content: flex-start; margin: 18px 32px 26px; }
@@ -254,10 +254,6 @@ body { padding-bottom: 48px; }
 .proto-reset:hover, .proto-reset:focus-visible { color: var(--blue); opacity: 1; }
 
 /* ---------- Smal layout (spårens steg) ---------- */
-/* Version 2: loggan linjerar med kortets vänsterkant på alla sidor */
-body[data-layout="narrow"] .header {
-  padding-left: max(40px, calc((100vw - 682px) / 2));
-}
 .page.narrow { max-width: 762px; padding-top: 52px; }
 .step-title {
   text-align: center; font-size: 40px; font-weight: 700; letter-spacing: -0.02em;
@@ -322,7 +318,6 @@ body[data-layout="narrow"] .header {
 .page.narrow .btn-primary:not(.btn-small) { min-width: 171px; }
 
 @media (max-width: 899px) {
-  body[data-layout="narrow"] .header { padding-left: 32px; }
   .page.narrow { padding-top: 40px; }
   .step-title { font-size: 24px; margin-bottom: 30px; }
   .stepper { grid-template-columns: repeat(4, 93px); margin-bottom: 38px; }
